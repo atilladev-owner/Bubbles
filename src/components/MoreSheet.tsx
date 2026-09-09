@@ -1,0 +1,157 @@
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { Download, Upload, X } from 'lucide-react';
+import Button from './Button';
+
+type Props = {
+  open: boolean;
+  lastBackupAt: string | null;
+  notice: string | null;
+  onClose: () => void;
+  onBackup: () => void;
+  onRestore: (file: File) => void;
+};
+
+function readableDate(iso: string | null): string {
+  if (iso === null) return 'No backup yet.';
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return 'No backup yet.';
+  return 'Last backup on ' + when.toLocaleDateString() + '.';
+}
+
+export default function MoreSheet({
+  open,
+  lastBackupAt,
+  notice,
+  onClose,
+  onBackup,
+  onRestore,
+}: Props) {
+  const reduce = useReducedMotion();
+  const filePicker = useRef<HTMLInputElement>(null);
+  const firstControl = useRef<HTMLButtonElement>(null);
+  const [confirmingRestore, setConfirmingRestore] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setConfirmingRestore(false);
+      return;
+    }
+    firstControl.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  const duration = reduce ? 0 : 0.18;
+
+  return (
+    <AnimatePresence>
+      {open ? (
+        <div className="fixed inset-0 z-30">
+          <motion.button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="absolute inset-0 h-full w-full bg-ink/30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration }}
+          />
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="More"
+            className="absolute inset-x-0 bottom-0 rounded-t-lg bg-panel shadow-sheet"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration, ease: 'easeOut' }}
+          >
+            <div
+              className="px-4 pt-4"
+              style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-24 text-ink">More</h2>
+                <button
+                  ref={firstControl}
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close"
+                  className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted press active:scale-[0.98] active:bg-wash"
+                >
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-2">
+                <Button tone="accent" full onClick={onBackup}>
+                  <Download size={18} aria-hidden="true" />
+                  Backup
+                </Button>
+                <p className="text-13 text-muted">{readableDate(lastBackupAt)}</p>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-2">
+                {confirmingRestore ? (
+                  <>
+                    <p className="text-15 text-muted">
+                      Restoring replaces every drink on this phone. Back up first if you are
+                      not sure.
+                    </p>
+                    <Button tone="accent" full onClick={() => filePicker.current?.click()}>
+                      Yes, choose a file
+                    </Button>
+                    <Button tone="quiet" full onClick={() => setConfirmingRestore(false)}>
+                      Keep what is here
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button tone="wash" full onClick={() => setConfirmingRestore(true)}>
+                      <Upload size={18} aria-hidden="true" />
+                      Restore
+                    </Button>
+                    <p className="text-13 text-muted">
+                      Reads a backup file and replaces every drink.
+                    </p>
+                  </>
+                )}
+                <input
+                  ref={filePicker}
+                  type="file"
+                  accept="application/json,.json"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = '';
+                    if (file) onRestore(file);
+                  }}
+                />
+              </div>
+
+              {notice === null ? null : (
+                <p role="status" className="mt-4 text-15 text-accent">
+                  {notice}
+                </p>
+              )}
+
+              <div className="mt-6 rounded-md bg-wash p-4">
+                <p className="text-15 text-ink">
+                  Add Bubbles to your home screen: tap Share, then Add to Home Screen.
+                </p>
+                <p className="mt-1 text-13 text-muted">
+                  Once it is there, it opens with no signal.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      ) : null}
+    </AnimatePresence>
+  );
+}
