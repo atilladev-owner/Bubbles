@@ -249,6 +249,54 @@ right over the list and back out, the switch's active state moves as a sliding i
 the More sheet rises from the bottom, and buttons press down. Nothing loops. All of it
 collapses to instant under `prefers-reduced-motion`.
 
+## Search ranking
+
+Search shows results from the first letter and keeps them in order of how well they
+match, so typing "Ba" brings up everything that starts with "Ba" at once and each further
+letter narrows and sharpens the list. Matching is case insensitive on the drink name and
+on every ingredient name. Rank, best first: the drink name starts with the query; a word
+inside the drink name starts with it; an ingredient name starts with it; the drink name
+contains it anywhere; an ingredient name contains it anywhere. Within a rank, keep the
+list order. While a query is active the group headings are dropped and the results are one
+flat ranked list, so the best match is always at the top. The ranking lives in
+`src/lib/drinks.ts` as a pure function with tests.
+
+## Capitalisation
+
+Drink names, group names and ingredient names always start with a capital letter. Drink
+names and group names are title cased, every word capitalised except "and", "or", "of",
+"with" and "&" after the first word, and anything already containing a capital inside a
+word, like "iPhone", is left alone. Ingredient names capitalise their first letter only.
+The rule runs in two places so it holds for every drink she will ever add: on save in the
+edit form, and on restore for every drink in the file. It never runs on display, so what
+is shown is exactly what is stored. It lives in `src/lib/text.ts` as pure functions with
+tests, and the spreadsheet import file is regenerated with the same rule.
+
+## Glass drink cards
+
+Drink rows on Home are glass, by the owner's explicit direction. Behind the list float four
+large soft shapes in `--bubble` and `--wash`, 180 to 260px, fixed to the ground and placed
+so at least one sits behind any screenful of rows; they never move, and they carry no
+text. A drink row is a sticker whose fill is `rgba(255, 255, 255, 0.62)` with
+`backdrop-filter: blur(14px)` and a sheen: a diagonal band from `rgba(255, 255, 255,
+0.55)` at the top left to transparent by 45 percent, laid over the fill, and a 1px inner
+highlight in `rgba(255, 255, 255, 0.8)` along the top edge. The edge, the hard shadow and
+the press stay exactly as every sticker's. On press the sheen shifts 12px to the right,
+120ms ease-out, and nothing else changes. Text contrast is computed against the darkest
+ground a row can sit over, `--bubble` blended at 62 percent white, and every pair still
+holds 4.5:1; the report shows the numbers. Fields, buttons, the search box and the
+masthead are not glass. Any drink added later is a row, so it is glass by construction.
+Where `backdrop-filter` is unsupported the row falls back to the plain sticker fill.
+
+## The maker's mark
+
+Bubbles is an Atilla Dev product and carries the same mark every Atilla Dev product does,
+placed where a phone app can carry it: at the foot of the More sheet, under a hairline,
+a link to https://atilladev.vercel.app reading "Product of Atilla Dev" in `--muted` at 13px
+with the crest at 22px to its left, the black crest on this light theme. The crest files
+live under `public/` as `atilla-crest-black.webp`. No fixed overlay and no watermark
+behind content on a 390px screen: the sheet foot is the one place it fits.
+
 ## Quality gates
 
 Every screen's content sits in a `main` landmark, and the Home content is `inert` while
