@@ -1,5 +1,6 @@
 import type { Drink, Ingredient } from '../types';
 import { PREPARATIONS } from './storage';
+import { capitalise, titleCase } from './text';
 
 export function newId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
@@ -31,12 +32,67 @@ export function isPreparation(drink: Drink): boolean {
   return drink.group === PREPARATIONS;
 }
 
+/** The words of a name, so a query can match the start of any one of them. */
+function words(value: string): string[] {
+  return value.split(/[^a-z0-9]+/i).filter((word) => word !== '');
+}
+
+/**
+ * How well one drink answers a query, best first: the name starts with it, a word inside
+ * the name starts with it, an ingredient starts with it, the name holds it anywhere, an
+ * ingredient holds it anywhere. Null when the drink does not answer at all.
+ */
+function rankOf(drink: Drink, needle: string): number | null {
+  const name = drink.name.toLowerCase();
+  if (name.startsWith(needle)) return 1;
+  if (words(name).some((word) => word.startsWith(needle))) return 2;
+
+  const ingredients = drink.ingredients.map((row) => row.name.toLowerCase());
+  if (ingredients.some((row) => row.startsWith(needle))) return 3;
+  if (name.includes(needle)) return 4;
+  if (ingredients.some((row) => row.includes(needle))) return 5;
+
+  return null;
+}
+
 /** Matches the drink name and any ingredient name, as she types. */
 export function matchesQuery(drink: Drink, query: string): boolean {
   const needle = query.trim().toLowerCase();
   if (needle === '') return true;
-  if (drink.name.toLowerCase().includes(needle)) return true;
-  return drink.ingredients.some((row) => row.name.toLowerCase().includes(needle));
+  return rankOf(drink, needle) !== null;
+}
+
+/**
+ * The drinks that answer the query, best match first. Ties keep the order they were
+ * given, so a list she has arranged stays arranged inside a rank.
+ */
+export function rankDrinks(drinks: Drink[], query: string): Drink[] {
+  const needle = query.trim().toLowerCase();
+  if (needle === '') return drinks;
+
+  const found: { drink: Drink; rank: number; place: number }[] = [];
+  drinks.forEach((drink, place) => {
+    const rank = rankOf(drink, needle);
+    if (rank !== null) found.push({ drink, rank, place });
+  });
+
+  return found
+    .sort((a, b) => a.rank - b.rank || a.place - b.place)
+    .map((entry) => entry.drink);
+}
+
+/**
+ * The drink as it is stored: the name and the group title cased, every ingredient name
+ * lifted to a capital. Everything else, the note and every figure included, is left as
+ * it was typed.
+ */
+export function capitaliseDrink(drink: Drink): Drink {
+  return {
+    ...drink,
+    name: titleCase(drink.name),
+    group: titleCase(drink.group),
+    ingredients: drink.ingredients.map((row) => ({ ...row, name: capitalise(row.name) })),
+  };
 }
 
 /** The stored order first, then any group she added, and Preparations always last. */
