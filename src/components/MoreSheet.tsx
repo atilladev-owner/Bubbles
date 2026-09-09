@@ -148,6 +148,25 @@ export default function MoreSheet({
                   Once it is there, it opens with no signal.
                 </p>
               </div>
+
+              {/* The maker's mark, where a phone app can carry one: the foot of the sheet. */}
+              <div className="mt-5 border-t border-line pt-1">
+                <a
+                  href="https://atilladev.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="quiet inline-flex min-h-11 items-center gap-2 text-13 text-muted"
+                >
+                  <img
+                    src="/atilla-crest-black.webp"
+                    alt=""
+                    width={400}
+                    height={411}
+                    className="h-5.5 w-auto shrink-0"
+                  />
+                  Product of Atilla Dev
+                </a>
+              </div>
             </div>
           </motion.div>
         </div>

@@ -11,8 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'script-defer',
       workbox: {
-        // The app shell, the icons and the fonts, so a launch with no signal works.
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // The app shell, the icons, the fonts and the crest, so a launch with no signal
+        // works and the maker's mark is there with everything else.
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,webp}'],
       },
       manifest: {
         name: 'Bubbles',
