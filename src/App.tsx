@@ -7,7 +7,7 @@ import MoreSheet from './components/MoreSheet';
 import { shouldOfferInstall } from './components/InstallHint';
 import { EXAMPLE_DRINKS } from './data/examples';
 import { backupFilename, parseBackup, toBackup } from './lib/backup';
-import { emptyDrink, orderGroups } from './lib/drinks';
+import { capitaliseDrink, emptyDrink, orderGroups } from './lib/drinks';
 import {
   DEFAULT_GROUPS,
   EMPTY_META,
@@ -182,7 +182,9 @@ export default function App() {
       setNotice('That file is not a Bubbles backup.');
       return;
     }
-    await persist(restored);
+    // A file can hold anything she typed on another day, so every name in it is
+    // brought up to the same rule the edit form applies.
+    await persist(restored.map(capitaliseDrink));
     setNotice(null);
     setMoreOpen(false);
     replace({ name: 'home' });

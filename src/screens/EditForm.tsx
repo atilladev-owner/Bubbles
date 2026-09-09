@@ -3,7 +3,7 @@ import { ArrowDown, ArrowUp, ChevronDown, ChevronLeft, Plus, X } from 'lucide-re
 import Button from '../components/Button';
 import FavouriteToggle from '../components/FavouriteToggle';
 import Field, { hintIdFor, inputClass } from '../components/Field';
-import { emptyIngredient } from '../lib/drinks';
+import { capitaliseDrink, emptyIngredient } from '../lib/drinks';
 import { PREPARATIONS } from '../lib/storage';
 import type { Drink, Ingredient } from '../types';
 
@@ -115,15 +115,19 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
       nameBox.current?.focus();
       return;
     }
-    onSave({
-      ...drink,
-      name: name.trim(),
-      group: chosenGroup === '' ? drink.group : chosenGroup,
-      favourite,
-      note,
-      ingredients,
-      updatedAt: new Date().toISOString(),
-    });
+    // The one place a name is tidied, along with a restore. What is stored is what is
+    // shown, so nothing is capitalised again on the way out.
+    onSave(
+      capitaliseDrink({
+        ...drink,
+        name: name.trim(),
+        group: chosenGroup === '' ? drink.group : chosenGroup,
+        favourite,
+        note,
+        ingredients,
+        updatedAt: new Date().toISOString(),
+      }),
+    );
   }
 
   const groupOptions = groups.includes(group) ? groups : [group, ...groups];
