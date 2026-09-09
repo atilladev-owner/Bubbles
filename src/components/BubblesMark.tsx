@@ -36,9 +36,11 @@ export function GroupMark({ className }: { className?: string }) {
       focusable="false"
       className={className}
     >
-      <circle cx="9" cy="16" r="8" fill={MARK_BUBBLE} />
-      <circle cx="19" cy="10" r="5" fill={MARK_BUBBLE} />
-      <circle cx="11" cy="5" r="3.5" fill={MARK_WASH} />
+      {/* Outlined in the edge tone so the mark still reads where it crosses a ground
+          shape of the same bubble tint behind the list. */}
+      <circle cx="9" cy="16" r="8" fill={MARK_BUBBLE} stroke="var(--edge)" strokeWidth="1.5" />
+      <circle cx="19" cy="10" r="5" fill={MARK_BUBBLE} stroke="var(--edge)" strokeWidth="1.5" />
+      <circle cx="11" cy="5" r="3.5" fill={MARK_WASH} stroke="var(--edge)" strokeWidth="1.5" />
     </svg>
   );
 }
