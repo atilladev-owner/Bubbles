@@ -35,7 +35,7 @@ computed ratios in the report.
 | `--accent` | `#C93A6B` | the one accent: primary action, active switch, links |
 | `--accent-deep` | `#A62C57` | pressed and focused accent |
 | `--bubble` | `#F6C6D6` | decorative bubbles, pour bars and sticker shadows, never text |
-| `--edge` | `#E7B4C6` | the 2px sticker border on every row, field and button |
+| `--edge` | `#C97A99` | the 2px sticker border on every row, field and button; holds 3:1 on `--panel` because it is the shape's only edge |
 
 Shadows are tinted toward the accent, never grey or black: `0 10px 30px rgba(201, 58,
 107, 0.10)` on sheets, `0 1px 0 rgba(201, 58, 107, 0.06)` under list rows. Nothing else
@@ -58,7 +58,7 @@ the sticker: a soft flat shape with a firm edge and a hard offset shadow, the wa
 puffy sticker sits on a notebook. It is cute, tactile, and it belongs to nobody's
 template.
 
-- **The sticker.** A surface on `--panel` with a 2px border in `--edge` (`#E7B4C6`) and a
+- **The sticker.** A surface on `--panel` with a 2px border in `--edge` (`#C97A99`) and a
   hard shadow of `3px 3px 0 var(--bubble)`, no blur. Radius scale: 10 on small controls,
   16 on rows, inputs and buttons, 22 on sheets. That is the whole scale, and nothing that
   holds text is a capsule. Every row, every field, every button and the search box is a
@@ -79,6 +79,8 @@ template.
   fixed height and inner scroll.
 - **Descriptive marks are never boxed.** The glass mark, the favourite state, the "as
   written" note and the ingredient count are plain text or an icon in `--muted` or a dot.
+  The favourite dot is `--accent` when on and `--muted` when off, and the label reads
+  "Favourite" or "Not a favourite" so the state never rests on colour alone.
   Chips, tags and badges are pills whatever their radius, and they do not exist here.
 
 ## Tables and numbers: the pour bars
@@ -124,7 +126,8 @@ Makgeolli, Ades, Soju, Highballs, and any group the user added, and Preparations
 Each row is the drink name in Fredoka 20 and, in `--muted`, the count of ingredients; a
 row with a glass figure carries a small "glass" mark so she knows it can be halved. Typing
 in the search filters rows as she types, across every group, matching the drink name and
-any ingredient name. A floating "Add drink" button sits bottom right above the safe area.
+any ingredient name. "Add" is a primary sticker button in the header beside "More";
+nothing floats over the list, and the list ends in plain space above the safe area.
 Empty state, when the list is empty: the bubbles, one sentence saying there are no drinks
 yet, and the Add button.
 
@@ -197,12 +200,14 @@ when the database is empty.
 Implemented in `src/lib/measure.ts` and covered by Vitest before the UI uses it.
 
 - Only glass figures are ever halved. Jar figures are never transformed.
-- A figure is halvable when it starts with a number: `83g`, `100g`, `1.5`, `0.5 bottle`.
-  The number is halved, rounded to the nearest 0.5, and rendered without trailing zeros
-  with the rest of the text kept: `83g` gives `41.5g`, `100g` gives `50g`, `1 bottle`
-  gives `0.5 bottle`.
-- Anything else, a blank, `1ea`, `10cm`, `2ea (10cm)`, a word, is returned unchanged and
-  flagged `asWritten: true` so the screen can mark it.
+- A figure is halvable when it starts with a number and the unit after it, if any, is one
+  that divides: none at all, `g`, `kg`, `mg`, `ml`, `cl`, `dl`, `l`, `oz`, `bottle`,
+  `bottles`, `shot`, `shots`, `cup`, `cups`, `tsp`, `tbsp`. The number is halved, rounded
+  to the nearest 0.5, and rendered without trailing zeros with the rest of the text kept:
+  `83g` gives `41.5g`, `100g` gives `50g`, `1 bottle` gives `0.5 bottle`.
+- Anything else is returned unchanged and flagged `asWritten: true` so the screen can
+  mark it: a blank, `1ea`, `10cm`, `2ea (10cm)`, `1/2ea`, `4 slices`, `1 wedge`, a word.
+  Counts and lengths are never split, because half a lemon slice is not a thing she pours.
 - The function is pure: `halve(value: string): { value: string; asWritten: boolean }`.
 
 Tests cover every example above, the empty string, whitespace padding, a decimal that
@@ -225,6 +230,14 @@ the More sheet rises from the bottom, and buttons press down. Nothing loops. All
 collapses to instant under `prefers-reduced-motion`.
 
 ## Quality gates
+
+Every screen's content sits in a `main` landmark, and the Home content is `inert` while
+any sheet or overlay is open, so focus and assistive technology stay inside it. Field
+errors are linked to their field with `aria-describedby` and `aria-invalid`, and focus
+moves to the first invalid field on save. Every tap target, links inside the table
+included, is 44px tall. Fredoka must actually render at 500 and 600: the shipped files
+keep the weight axis or ship as separate static faces, and the report proves it by
+measuring rendered widths at two weights.
 
 One `h1` per screen, visible focus rings, labels above inputs, no sideways scroll at 390px,
 AA contrast written down for every pair, no pills, no emoji, no dashes as punctuation in any
