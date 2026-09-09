@@ -196,7 +196,9 @@ export default function App() {
 
   return (
     <div className="relative min-h-dvh bg-ground">
-      <div inert={overlayOpen}>
+      {/* Home steps out of reach while anything sits over it, so the Tab order and a
+          screen reader stay inside the sheet or the page that is open. */}
+      <div inert={overlayOpen || moreOpen}>
         <Home
           drinks={drinks}
           groupOrder={groupOrder}
