@@ -101,8 +101,28 @@ Group headings are Fredoka 24 weight 600 in `--ink`, each with a small three bub
 its left in `--bubble` and `--wash`, and generous space above so the list breathes in
 sections rather than running as one column. Rows are stickers with the name in Fredoka 22
 and the ingredient count under it; the glass mark sits right in `--muted`. Rows enter once,
-on first render, rising 8px with a 30ms stagger, and never again. The wordmark is Fredoka
-44 over a bigger bubble cluster, 120px, that overlaps the top edge of the screen.
+on first render, rising 8px with a 30ms stagger, and never again.
+
+## The masthead
+
+A wordmark in the top left corner is what every app does, so Bubbles does not. Home opens
+on a centred masthead that is the brand itself: the wordmark is a sticker. "Bubbles" in
+Fredoka 44 weight 600 in `--ink` sits inside a sticker on `--panel` with the 2px `--edge`
+border and a heavier hard shadow, `5px 5px 0 var(--bubble)`, radius 22, padding 12px 26px,
+and the whole sticker is rotated minus 3 degrees, the way a sticker is never stuck on
+quite straight. Around and behind it floats a larger bubble cluster, 200px wide, in
+`--bubble` and `--wash`: two bubbles peek out from behind the sticker's top right, one
+larger one sits low on the left, and none of them cross the wordmark's letters. The
+masthead is 168px tall including the safe area, and the sticker is the only text in it. It
+is the one place in the app where something is centred, and that is what makes it stand
+out.
+
+The two controls sit under the masthead as a row, not beside the wordmark: "Add drink"
+as a primary sticker taking the remaining width, and "More" as a secondary sticker with
+its icon, 44px tall, both pressing like every other sticker. Search follows, then the list.
+The empty state shows the same masthead, the sentence, and the same control row. The app
+icon stays the bubble cluster: at 180px a word is unreadable, and the cluster is what the
+sticker floats in.
 
 ## The bubbles
 
@@ -120,16 +140,16 @@ at 44px or more.
 
 ### Home
 
-The wordmark with the bubbles behind it, a search field, then the list. Favourites come
+The wordmark with the bubbles behind it, a search field, then the list, under the masthead and the control row described in "The masthead". Favourites come
 first under a "Favourites" heading, then every group in the order Ritas, Slushes,
 Makgeolli, Ades, Soju, Highballs, and any group the user added, and Preparations last.
 Each row is the drink name in Fredoka 20 and, in `--muted`, the count of ingredients; a
 row with a glass figure carries a small "glass" mark so she knows it can be halved. Typing
 in the search filters rows as she types, across every group, matching the drink name and
-any ingredient name. "Add" is a primary sticker button in the header beside "More";
+any ingredient name. "Add drink" and "More" are the control row under the masthead;
 nothing floats over the list, and the list ends in plain space above the safe area.
-Empty state, when the list is empty: the bubbles, one sentence saying there are no drinks
-yet, and the Add button.
+Empty state, when the list is empty: the masthead, one sentence saying there are no drinks
+yet, and the same control row.
 
 ### Drink
 
