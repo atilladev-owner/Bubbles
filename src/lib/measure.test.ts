@@ -60,6 +60,22 @@ describe('halve', () => {
     expect(halve('2ea (10cm)')).toEqual({ value: '2ea (10cm)', asWritten: true });
   });
 
+  it('halves a measure in shots', () => {
+    expect(halve('2 shots')).toEqual({ value: '1 shots', asWritten: false });
+  });
+
+  it('leaves a count of slices as written', () => {
+    expect(halve('4 slices')).toEqual({ value: '4 slices', asWritten: true });
+  });
+
+  it('leaves a wedge as written', () => {
+    expect(halve('1 wedge')).toEqual({ value: '1 wedge', asWritten: true });
+  });
+
+  it('leaves a fraction of a count as written', () => {
+    expect(halve('1/2ea')).toEqual({ value: '1/2ea', asWritten: true });
+  });
+
   it('leaves a word as written', () => {
     expect(halve('to taste')).toEqual({ value: 'to taste', asWritten: true });
   });
