@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchesQuery, orderGroups, sectionsFor } from './drinks';
+import { capitaliseDrink, matchesQuery, orderGroups, rankDrinks, sectionsFor } from './drinks';
 import { DEFAULT_GROUPS } from './storage';
 import type { Drink } from '../types';
 
@@ -82,5 +82,102 @@ describe('search feeding the sections', () => {
       ['Favourites', ['Classic Margarita']],
       ['Ritas', ['Tommys Margarita']],
     ]);
+  });
+});
+
+describe('rankDrinks', () => {
+  // One drink for each of the five ranks, deliberately out of order in the list.
+  const fizz = drink('Gin Fizz', 'Highballs', false, 'Rhubarb syrup'); // ingredient contains
+  const punch = drink('Milk Punch', 'Highballs', false, 'Banana milk'); // ingredient starts
+  const tall = drink('Whisky Highball', 'Highballs', false, 'Soda water'); // name contains
+  const breeze = drink('Bay Breeze', 'Highballs', false, 'Cranberry juice'); // name starts
+  const ade = drink('Strawberry Basil Ade', 'Ades', false, 'Lemon juice'); // a word starts
+  const all = [fizz, punch, tall, breeze, ade];
+  const names = (query: string) => rankDrinks(all, query).map((found) => found.name);
+
+  it('puts the best match first and keeps all five ranks in order', () => {
+    expect(names('ba')).toEqual([
+      'Bay Breeze',
+      'Strawberry Basil Ade',
+      'Milk Punch',
+      'Whisky Highball',
+      'Gin Fizz',
+    ]);
+  });
+
+  it('surfaces everything starting with the query from the first letters', () => {
+    expect(names('b')).toContain('Bay Breeze');
+    expect(names('b')[0]).toBe('Bay Breeze');
+  });
+
+  it('does not care about case', () => {
+    expect(names('BA')).toEqual(names('ba'));
+  });
+
+  it('ignores whitespace padding', () => {
+    expect(names('  ba  ')).toEqual(names('ba'));
+  });
+
+  it('keeps the list order inside one rank', () => {
+    const first = drink('Lemon Ade', 'Ades', false, '');
+    const second = drink('Lemon Slush', 'Slushes', false, '');
+    expect(rankDrinks([first, second], 'lemon').map((d) => d.name)).toEqual([
+      'Lemon Ade',
+      'Lemon Slush',
+    ]);
+    expect(rankDrinks([second, first], 'lemon').map((d) => d.name)).toEqual([
+      'Lemon Slush',
+      'Lemon Ade',
+    ]);
+  });
+
+  it('returns everything, in list order, for an empty query', () => {
+    expect(rankDrinks(all, '')).toEqual(all);
+    expect(rankDrinks(all, '   ')).toEqual(all);
+  });
+
+  it('returns nothing when nothing matches', () => {
+    expect(rankDrinks(all, 'zzz')).toEqual([]);
+  });
+
+  it('agrees with the match that feeds the sections', () => {
+    for (const query of ['ba', 'lime', 'soda', 'zzz', 'margarita']) {
+      const ranked = rankDrinks(all, query).length;
+      const matched = all.filter((d) => matchesQuery(d, query)).length;
+      expect(ranked).toBe(matched);
+    }
+  });
+});
+
+describe('capitaliseDrink', () => {
+  it('title cases the name and the group and lifts every ingredient', () => {
+    const rough: Drink = {
+      id: 'rough',
+      name: 'jim beam & coke',
+      group: 'highballs and more',
+      favourite: false,
+      note: 'left exactly as it was typed',
+      ingredients: [
+        { name: 'jim beam', jar: '50g', glass: '' },
+        { name: 'peach mak.g mix', jar: '', glass: '10g' },
+      ],
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+    expect(capitaliseDrink(rough)).toEqual({
+      ...rough,
+      name: 'Jim Beam & Coke',
+      group: 'Highballs and More',
+      ingredients: [
+        { name: 'Jim beam', jar: '50g', glass: '' },
+        { name: 'Peach mak.g mix', jar: '', glass: '10g' },
+      ],
+    });
+  });
+
+  it('is pure and does not touch the drink it was given', () => {
+    const rough = drink('soda water', 'ades', false, 'soda water');
+    capitaliseDrink(rough);
+    expect(rough.name).toBe('soda water');
+    expect(rough.ingredients[0]?.name).toBe('soda water');
   });
 });
