@@ -10,8 +10,8 @@ export default function FavouriteToggle({ on, onToggle }: Props) {
       aria-pressed={on}
       onClick={onToggle}
       className={[
-        'inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm px-3 press active:scale-[0.98]',
-        on ? 'bg-wash text-accent-deep' : 'bg-panel text-muted',
+        'inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm px-3 press active:scale-[0.98] active:bg-wash',
+        on ? 'text-accent-deep' : 'text-muted',
       ].join(' ')}
     >
       <span

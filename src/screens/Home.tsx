@@ -35,8 +35,8 @@ function DrinkRow({ drink, onOpen }: { drink: Drink; onOpen: () => void }) {
         </span>
       </span>
       {hasGlassFigures(drink) ? (
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-sm bg-wash px-2 py-1 text-13 font-bold text-accent-deep">
-          <GlassWater size={14} aria-hidden="true" />
+        <span className="inline-flex shrink-0 items-center gap-1 text-13 font-bold text-muted">
+          <GlassWater size={16} aria-hidden="true" />
           glass
         </span>
       ) : null}
