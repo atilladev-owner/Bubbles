@@ -278,7 +278,9 @@
    * pixels into place behind the one above it. Only transform and opacity move.
    */
   .enter {
-    animation: rise 180ms ease-out both;
+    /* Backwards, never both: a filling animation would outrank the press transform and
+       leave an arrived row unable to move onto its shadow. */
+    animation: rise 180ms ease-out backwards;
   }
 }
 
