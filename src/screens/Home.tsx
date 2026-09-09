@@ -67,22 +67,37 @@ export default function Home({
 
   return (
     <div
-      className="mx-auto w-full max-w-[560px] px-4 pb-32"
-      style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+      className="mx-auto w-full max-w-[560px] px-4"
+      style={{
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))',
+      }}
     >
       <header className="flex items-center justify-between gap-4">
         <div className="relative isolate flex h-26 items-center">
           <BubblesMark size={96} className="pointer-events-none absolute top-0 -left-4 z-0" />
           <h1 className="relative z-10 text-38 leading-none text-ink">Bubbles</h1>
         </div>
-        <button
-          type="button"
-          onClick={onOpenMore}
-          className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-line bg-panel px-3 text-muted press active:scale-[0.98] active:bg-wash"
-        >
-          <Ellipsis size={18} aria-hidden="true" />
-          <span className="text-15 font-bold">More</span>
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {isEmpty ? null : (
+            <button
+              type="button"
+              onClick={onAddDrink}
+              className="inline-flex min-h-11 items-center gap-1 rounded-sm bg-accent px-3 text-white press active:scale-[0.98] active:bg-accent-deep"
+            >
+              <Plus size={18} aria-hidden="true" />
+              <span className="text-15 font-bold">Add</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onOpenMore}
+            className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-line bg-panel px-3 text-muted press active:scale-[0.98] active:bg-wash"
+          >
+            <Ellipsis size={18} aria-hidden="true" />
+            <span className="text-15 font-bold">More</span>
+          </button>
+        </div>
       </header>
 
       {showInstallHint ? <InstallHint onDismiss={onDismissInstallHint} /> : null}
@@ -146,17 +161,6 @@ export default function Home({
         </>
       )}
 
-      {isEmpty ? null : (
-        <div
-          className="fixed right-4 z-10"
-          style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
-        >
-          <Button onClick={onAddDrink}>
-            <Plus size={18} aria-hidden="true" />
-            Add drink
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
