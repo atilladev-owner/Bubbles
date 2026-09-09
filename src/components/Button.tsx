@@ -10,7 +10,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const TONES: Record<Tone, string> = {
   accent: 'bg-accent text-white active:bg-accent-deep',
-  wash: 'bg-wash text-accent active:bg-line',
+  wash: 'bg-wash text-accent-deep active:bg-line',
   quiet: 'bg-transparent text-muted active:bg-wash',
 };
 

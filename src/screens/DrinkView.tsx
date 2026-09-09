@@ -85,7 +85,7 @@ export default function DrinkView({
         <button
           type="button"
           onClick={onBack}
-          className="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-sm px-2 text-accent press active:scale-[0.98] active:bg-wash"
+          className="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-sm px-2 text-accent press active:scale-[0.98] active:bg-wash active:text-accent-deep"
         >
           <ChevronLeft size={20} aria-hidden="true" />
           <span className="text-17 font-bold">Drinks</span>
