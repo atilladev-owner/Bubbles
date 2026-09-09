@@ -89,7 +89,7 @@ export default function MoreSheet({
               </div>
 
               <div className="mt-6 flex flex-col gap-2">
-                <Button tone="accent" full onClick={onBackup}>
+                <Button tone="primary" full onClick={onBackup}>
                   <Download size={18} aria-hidden="true" />
                   Backup
                 </Button>
@@ -103,7 +103,7 @@ export default function MoreSheet({
                       Restoring replaces every drink on this phone. Back up first if you are
                       not sure.
                     </p>
-                    <Button tone="accent" full onClick={() => filePicker.current?.click()}>
+                    <Button tone="primary" full onClick={() => filePicker.current?.click()}>
                       Yes, choose a file
                     </Button>
                     <Button tone="quiet" full onClick={() => setConfirmingRestore(false)}>
@@ -112,7 +112,7 @@ export default function MoreSheet({
                   </>
                 ) : (
                   <>
-                    <Button tone="wash" full onClick={() => setConfirmingRestore(true)}>
+                    <Button tone="secondary" full onClick={() => setConfirmingRestore(true)}>
                       <Upload size={18} aria-hidden="true" />
                       Restore
                     </Button>

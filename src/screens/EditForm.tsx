@@ -230,7 +230,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
           ))}
 
           <Button
-            tone="wash"
+            tone="secondary"
             full
             onClick={() => setIngredients((rows) => [...rows, emptyIngredient()])}
           >
@@ -243,7 +243,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
           <Button type="submit" full>
             Save
           </Button>
-          <Button tone="wash" full onClick={onCancel}>
+          <Button tone="secondary" full onClick={onCancel}>
             Cancel
           </Button>
         </div>
@@ -257,7 +257,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
                 Delete this drink for good? This cannot be undone.
               </p>
               <div className="flex w-full flex-col gap-2">
-                <Button tone="accent" full onClick={onDelete}>
+                <Button tone="primary" full onClick={onDelete}>
                   Yes, delete it
                 </Button>
                 <Button tone="quiet" full onClick={() => setConfirmingDelete(false)}>

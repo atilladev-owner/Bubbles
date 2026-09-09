@@ -8,15 +8,15 @@ type Props = { onDismiss: () => void };
  */
 export default function InstallHint({ onDismiss }: Props) {
   return (
-    <div className="mt-4 flex items-start gap-3 rounded-md border border-line bg-panel p-4">
-      <p className="text-15">
+    <div className="mt-5 flex items-start gap-3 border-b-2 border-wash pb-5">
+      <p className="text-15 text-ink">
         Add Bubbles to your home screen: tap Share, then Add to Home Screen.
       </p>
       <button
         type="button"
         onClick={onDismiss}
         aria-label="Dismiss the install hint"
-        className="-mr-2 -mt-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-muted press active:scale-[0.98] active:bg-wash"
+        className="quiet -mt-2 -mr-2 inline-flex h-11 w-11 shrink-0 items-center justify-center text-muted"
       >
         <X size={20} aria-hidden="true" />
       </button>

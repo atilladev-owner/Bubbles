@@ -163,7 +163,7 @@ export default function DrinkView({
       ) : null}
 
       <div className="mt-10">
-        <Button tone="wash" full onClick={onEdit}>
+        <Button tone="secondary" full onClick={onEdit}>
           <Pencil size={18} aria-hidden="true" />
           Edit
         </Button>
