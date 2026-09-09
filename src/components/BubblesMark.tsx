@@ -34,8 +34,8 @@ export function GroupMark({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 26 26"
-      width={26}
-      height={26}
+      width={28}
+      height={28}
       aria-hidden="true"
       focusable="false"
       className={className}
