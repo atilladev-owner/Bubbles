@@ -146,9 +146,9 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
           <textarea
             id={uid + '-note'}
             value={note}
-            rows={3}
+            rows={5}
             onChange={(event) => setNote(event.target.value)}
-            className={inputClass}
+            className={inputClass + ' note-field'}
           />
         </Field>
 

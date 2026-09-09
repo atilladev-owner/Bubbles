@@ -139,6 +139,36 @@
     border-radius: 4px;
   }
 
+  /* The note keeps one fixed height and scrolls inside itself when it runs long, with a
+     thin bar in the bubble tint. Browsers that draw overlay bars, iOS among them, show their
+     own bar and ignore the colours, so the field still scrolls the same everywhere. */
+  .note-field {
+    height: 9.5rem;
+    resize: none;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bubble) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  .note-field::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .note-field::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 12px 0;
+  }
+
+  .note-field::-webkit-scrollbar-thumb {
+    background: var(--bubble);
+    border-radius: 3px;
+  }
+
+  .note-field::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+
   ::selection {
     background: var(--wash);
     color: var(--ink);
