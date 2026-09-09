@@ -29,7 +29,7 @@ function MeasureSwitch({ half, onChange }: { half: boolean; onChange: (half: boo
       <motion.span
         aria-hidden="true"
         className="absolute top-1 bottom-1 left-1 rounded-sm bg-accent"
-        style={{ width: 'calc(50% - 0.25rem)' }}
+        style={{ width: 'calc(50% - 0.375rem)' }}
         animate={{ x: half ? 'calc(100% + 0.25rem)' : '0%' }}
         transition={{ duration: reduce ? 0 : 0.18, ease: 'easeOut' }}
       />

@@ -70,18 +70,15 @@ export default function Home({
       className="mx-auto w-full max-w-[560px] px-4 pb-32"
       style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
     >
-      <header className="flex items-start justify-between gap-4">
-        <div className="relative isolate pt-4">
-          <BubblesMark
-            size={124}
-            className="pointer-events-none absolute -left-7 -top-1 z-0"
-          />
+      <header className="flex items-center justify-between gap-4">
+        <div className="relative isolate flex h-26 items-center">
+          <BubblesMark size={96} className="pointer-events-none absolute top-0 -left-4 z-0" />
           <h1 className="relative z-10 text-38 leading-none text-ink">Bubbles</h1>
         </div>
         <button
           type="button"
           onClick={onOpenMore}
-          className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-sm border border-line bg-panel px-3 text-muted press active:scale-[0.98] active:bg-wash"
+          className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-line bg-panel px-3 text-muted press active:scale-[0.98] active:bg-wash"
         >
           <Ellipsis size={18} aria-hidden="true" />
           <span className="text-15 font-bold">More</span>
