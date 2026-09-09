@@ -4,7 +4,7 @@ import { ChevronLeft, Pencil } from 'lucide-react';
 import Button from '../components/Button';
 import FavouriteToggle from '../components/FavouriteToggle';
 import { hasGlassFigures, preparationFor } from '../lib/drinks';
-import { halve } from '../lib/measure';
+import { grams, halve } from '../lib/measure';
 import type { Drink } from '../types';
 
 type Props = {
@@ -24,7 +24,7 @@ const MEASURES = [
 function MeasureSwitch({ half, onChange }: { half: boolean; onChange: (half: boolean) => void }) {
   const reduce = useReducedMotion();
   return (
-    <fieldset className="relative mt-6 grid grid-cols-2 gap-1 rounded-md border-0 bg-wash p-1">
+    <fieldset className="sticker press relative mt-6 grid grid-cols-2 gap-1 rounded-md p-1">
       <legend className="sr-only">Measure</legend>
       <motion.span
         aria-hidden="true"
@@ -57,9 +57,37 @@ function MeasureSwitch({ half, onChange }: { half: boolean; onChange: (half: boo
   );
 }
 
-function Figure({ text }: { text: string }) {
-  if (text.trim() === '') return null;
-  return <span className="font-display text-24 tabular text-ink">{text}</span>;
+/**
+ * A figure and, under it, its share of the largest gram figure in the same column, so
+ * the ratios of a recipe read at a glance: three times the syrup is three times the bar.
+ * A value that is not a weight, and a blank, draw nothing.
+ */
+function Figure({ text, largest, live }: { text: string; largest: number; live: boolean }) {
+  const trimmed = text.trim();
+  if (trimmed === '') return null;
+  const weight = grams(text);
+  const share = weight === null || largest <= 0 ? null : weight / largest;
+
+  // A value that opens with a number is a measurement and is set like one. A value that
+  // is a phrase, "to taste" among them, is read rather than measured, so it stays body text.
+  if (!/^\d/.test(trimmed)) {
+    return <span className="block text-17 break-words text-ink">{text}</span>;
+  }
+
+  return (
+    <>
+      <span className="block font-display text-28 font-medium tabular break-words text-ink">
+        {text}
+      </span>
+      {share === null ? null : (
+        <span
+          aria-hidden="true"
+          className={'mt-1.5 block h-1.5 ' + (live ? 'bg-accent' : 'bg-bubble')}
+          style={{ width: 'max(4px, ' + (share * 100).toFixed(1) + '%)' }}
+        />
+      )}
+    </>
+  );
 }
 
 export default function DrinkView({
@@ -76,8 +104,15 @@ export default function DrinkView({
     (row) => row.name.trim() !== '' || row.jar.trim() !== '' || row.glass.trim() !== '',
   );
 
+  const shown = rows.map((row) => ({
+    row,
+    glass: half ? halve(row.glass) : { value: row.glass, asWritten: false },
+  }));
+  const largestJar = Math.max(0, ...shown.map((item) => grams(item.row.jar) ?? 0));
+  const largestGlass = Math.max(0, ...shown.map((item) => grams(item.glass.value) ?? 0));
+
   return (
-    <div
+    <main
       className="mx-auto w-full max-w-[560px] px-4 pb-16"
       style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
     >
@@ -85,7 +120,7 @@ export default function DrinkView({
         <button
           type="button"
           onClick={onBack}
-          className="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-sm px-2 text-accent press active:scale-[0.98] active:bg-wash active:text-accent-deep"
+          className="quiet -ml-2 inline-flex min-h-11 items-center gap-1 px-2 text-muted"
         >
           <ChevronLeft size={20} aria-hidden="true" />
           <span className="text-17 font-bold">Drinks</span>
@@ -100,55 +135,60 @@ export default function DrinkView({
 
       {showGlass ? <MeasureSwitch half={half} onChange={setHalf} /> : null}
 
-      <table className="mt-6 w-full table-fixed border-collapse">
+      <table className="mt-8 w-full table-fixed border-collapse">
         <caption className="sr-only">Ingredients for {drink.name}</caption>
         <colgroup>
-          <col style={{ width: showGlass ? '42%' : '58%' }} />
-          <col style={{ width: showGlass ? '29%' : '42%' }} />
-          {showGlass ? <col style={{ width: '29%' }} /> : null}
+          <col style={{ width: showGlass ? '40%' : '58%' }} />
+          <col style={{ width: showGlass ? '30%' : '42%' }} />
+          {showGlass ? <col style={{ width: '30%' }} /> : null}
         </colgroup>
         <thead>
-          <tr className="border-b border-line">
-            <th scope="col" className="pb-2 text-left text-13 font-bold text-muted">
+          <tr className="border-b-2 border-wash">
+            <th scope="col" className="pb-2 text-left font-display text-15 font-medium text-muted">
               Ingredient
             </th>
-            <th scope="col" className="pb-2 text-left text-13 font-bold text-muted">
+            <th scope="col" className="pb-2 text-left font-display text-15 font-medium text-muted">
               Jar
             </th>
             {showGlass ? (
-              <th scope="col" className="pb-2 text-left text-13 font-bold text-muted">
+              <th
+                scope="col"
+                className="pb-2 text-left font-display text-15 font-medium text-muted"
+              >
                 Glass
               </th>
             ) : null}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => {
-            const preparation = preparationFor(drinks, row.name);
-            const glass = half ? halve(row.glass) : { value: row.glass, asWritten: false };
+          {shown.map((item, index) => {
+            const preparation = preparationFor(drinks, item.row.name);
             return (
-              <tr key={row.name + ':' + index} className="border-b border-line align-top">
-                <td className="py-3 pr-2 text-17 break-words">
+              <tr
+                key={item.row.name + ':' + index}
+                className="border-b-2 border-wash align-top"
+              >
+                <td className="py-4 pr-3 text-17 break-words">
                   {preparation && preparation.id !== drink.id ? (
                     <button
                       type="button"
                       onClick={() => onOpenDrink(preparation.id)}
-                      className="text-left text-accent underline underline-offset-2"
+                      className="quiet -my-1 inline-flex min-h-11 items-center text-left text-accent underline underline-offset-2"
                     >
-                      {row.name}
+                      {item.row.name}
                     </button>
                   ) : (
-                    row.name
+                    item.row.name
                   )}
                 </td>
-                <td className="py-3 pr-2 break-words">
-                  <Figure text={row.jar} />
+                <td className="py-4 pr-3">
+                  <Figure text={item.row.jar} largest={largestJar} live={false} />
                 </td>
                 {showGlass ? (
-                  <td className="py-3 break-words">
-                    <Figure text={glass.value} />
-                    {half && glass.asWritten && row.glass.trim() !== '' ? (
-                      <span className="mt-1 block text-13 text-muted">as written</span>
+                  <td className="py-4">
+                    <Figure text={item.glass.value} largest={largestGlass} live={true} />
+                    {half && item.glass.asWritten && item.row.glass.trim() !== '' ? (
+                      <span className="mt-1.5 block text-13 text-muted">as written</span>
                     ) : null}
                   </td>
                 ) : null}
@@ -168,6 +208,6 @@ export default function DrinkView({
           Edit
         </Button>
       </div>
-    </div>
+    </main>
   );
 }
