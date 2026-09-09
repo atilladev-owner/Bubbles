@@ -1,8 +1,8 @@
-import { useId, useState } from 'react';
-import { ArrowDown, ArrowUp, ChevronLeft, Plus, X } from 'lucide-react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronLeft, Plus, X } from 'lucide-react';
 import Button from '../components/Button';
 import FavouriteToggle from '../components/FavouriteToggle';
-import Field, { inputClass } from '../components/Field';
+import Field, { hintIdFor, inputClass } from '../components/Field';
 import { emptyIngredient } from '../lib/drinks';
 import { PREPARATIONS } from '../lib/storage';
 import type { Drink, Ingredient } from '../types';
@@ -18,6 +18,8 @@ type Props = {
 
 const NEW_GROUP = '__new__';
 
+const TOOL = 'quiet inline-flex h-11 w-11 items-center justify-center text-muted disabled:opacity-40';
+
 function move<T>(items: T[], from: number, to: number): T[] {
   if (to < 0 || to >= items.length) return items;
   const next = items.slice();
@@ -27,8 +29,63 @@ function move<T>(items: T[], from: number, to: number): T[] {
   return next;
 }
 
+/**
+ * The note keeps one fixed height and scrolls inside itself. iOS hides its scrollbar at
+ * rest, so a soft fade sits over the bottom edge whenever there is more text below, and
+ * clipped writing is never silent.
+ */
+function NoteField({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const box = useRef<HTMLTextAreaElement>(null);
+  const [more, setMore] = useState(false);
+
+  const measure = useCallback(() => {
+    const el = box.current;
+    if (el === null) return;
+    setMore(el.scrollHeight - el.clientHeight - el.scrollTop > 2);
+  }, []);
+
+  useEffect(() => {
+    measure();
+  }, [measure, value]);
+
+  return (
+    <div className="relative">
+      <textarea
+        ref={box}
+        id={id}
+        value={value}
+        rows={5}
+        onScroll={measure}
+        onChange={(event) => onChange(event.target.value)}
+        className={inputClass + ' note-field'}
+      />
+      <span
+        aria-hidden="true"
+        className={
+          'pointer-events-none absolute inset-x-0.5 bottom-0.5 block h-8 rounded-b-[14px] ' +
+          'transition-opacity duration-150 ' +
+          (more ? 'opacity-100' : 'opacity-0')
+        }
+        style={{
+          backgroundImage:
+            'linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--panel) 85%)',
+        }}
+      />
+    </div>
+  );
+}
+
 export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDelete }: Props) {
   const uid = useId();
+  const nameBox = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(drink.name);
   const [group, setGroup] = useState(drink.group);
   const [newGroup, setNewGroup] = useState('');
@@ -43,6 +100,8 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
 
   const chosenGroup = addingGroup ? newGroup.trim() : group;
   const nameIsEmpty = name.trim() === '';
+  const nameId = uid + '-name';
+  const nameIsWrong = touched && nameIsEmpty;
 
   function updateIngredient(index: number, patch: Partial<Ingredient>) {
     setIngredients((rows) =>
@@ -52,7 +111,10 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
 
   function submit() {
     setTouched(true);
-    if (nameIsEmpty) return;
+    if (nameIsEmpty) {
+      nameBox.current?.focus();
+      return;
+    }
     onSave({
       ...drink,
       name: name.trim(),
@@ -67,7 +129,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
   const groupOptions = groups.includes(group) ? groups : [group, ...groups];
 
   return (
-    <div
+    <main
       className="mx-auto w-full max-w-[560px] px-4 pb-16"
       style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
     >
@@ -75,7 +137,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
         <button
           type="button"
           onClick={onCancel}
-          className="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-sm px-2 text-accent press active:scale-[0.98] active:bg-wash active:text-accent-deep"
+          className="quiet -ml-2 inline-flex min-h-11 items-center gap-1 px-2 text-muted"
         >
           <ChevronLeft size={20} aria-hidden="true" />
           <span className="text-17 font-bold">Back</span>
@@ -86,7 +148,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
       <h1 className="mt-4 text-30 text-ink">{isNew ? 'New drink' : 'Edit drink'}</h1>
 
       <form
-        className="mt-6 flex flex-col gap-5"
+        className="mt-8 flex flex-col gap-6"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
@@ -94,40 +156,51 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
       >
         <Field
           label="Name"
-          htmlFor={uid + '-name'}
-          hint={touched && nameIsEmpty ? 'A drink needs a name before it can be saved.' : ''}
+          htmlFor={nameId}
+          error={nameIsWrong}
+          hint={nameIsWrong ? 'A drink needs a name before it can be saved.' : ''}
         >
           <input
-            id={uid + '-name'}
+            ref={nameBox}
+            id={nameId}
             value={name}
             onChange={(event) => setName(event.target.value)}
             className={inputClass}
             autoComplete="off"
+            aria-invalid={nameIsWrong}
+            aria-describedby={nameIsWrong ? hintIdFor(nameId) : undefined}
           />
         </Field>
 
         <Field label="Group" htmlFor={uid + '-group'}>
-          <select
-            id={uid + '-group'}
-            value={addingGroup ? NEW_GROUP : group}
-            onChange={(event) => {
-              const value = event.target.value;
-              if (value === NEW_GROUP) {
-                setAddingGroup(true);
-              } else {
-                setAddingGroup(false);
-                setGroup(value);
-              }
-            }}
-            className={inputClass}
-          >
-            {groupOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-            <option value={NEW_GROUP}>New group</option>
-          </select>
+          <div className="relative">
+            <select
+              id={uid + '-group'}
+              value={addingGroup ? NEW_GROUP : group}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value === NEW_GROUP) {
+                  setAddingGroup(true);
+                } else {
+                  setAddingGroup(false);
+                  setGroup(value);
+                }
+              }}
+              className={inputClass}
+            >
+              {groupOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+              <option value={NEW_GROUP}>New group</option>
+            </select>
+            <ChevronDown
+              size={20}
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-muted"
+            />
+          </div>
         </Field>
 
         {addingGroup ? (
@@ -143,31 +216,27 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
         ) : null}
 
         <Field label="Note" htmlFor={uid + '-note'}>
-          <textarea
-            id={uid + '-note'}
-            value={note}
-            rows={5}
-            onChange={(event) => setNote(event.target.value)}
-            className={inputClass + ' note-field'}
-          />
+          <NoteField id={uid + '-note'} value={note} onChange={setNote} />
         </Field>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-15 text-muted">Ingredients</h2>
+        <section className="flex flex-col gap-5">
+          <h2 className="text-20 text-ink">Ingredients</h2>
           {ingredients.map((row, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 rounded-lg border border-line bg-panel p-3"
+              className="flex flex-col gap-4 border-b-2 border-wash pb-5"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-13 font-bold text-muted">Row {index + 1}</span>
+                <span className="font-display text-15 font-medium text-muted">
+                  Row {index + 1}
+                </span>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
                     aria-label={'Move row ' + (index + 1) + ' up'}
                     disabled={index === 0}
                     onClick={() => setIngredients((rows) => move(rows, index, index - 1))}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted press active:scale-[0.98] active:bg-wash disabled:opacity-40"
+                    className={TOOL}
                   >
                     <ArrowUp size={18} aria-hidden="true" />
                   </button>
@@ -176,7 +245,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
                     aria-label={'Move row ' + (index + 1) + ' down'}
                     disabled={index === ingredients.length - 1}
                     onClick={() => setIngredients((rows) => move(rows, index, index + 1))}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted press active:scale-[0.98] active:bg-wash disabled:opacity-40"
+                    className={TOOL}
                   >
                     <ArrowDown size={18} aria-hidden="true" />
                   </button>
@@ -189,7 +258,7 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
                         return next.length > 0 ? next : [emptyIngredient()];
                       })
                     }
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted press active:scale-[0.98] active:bg-wash"
+                    className={TOOL}
                   >
                     <X size={18} aria-hidden="true" />
                   </button>
@@ -250,13 +319,13 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
       </form>
 
       {isNew ? null : (
-        <div className="mt-8 flex flex-col items-center gap-3">
+        <div className="mt-10 flex flex-col items-center gap-3">
           {confirmingDelete ? (
             <>
               <p className="text-15 text-muted">
                 Delete this drink for good? This cannot be undone.
               </p>
-              <div className="flex w-full flex-col gap-2">
+              <div className="flex w-full flex-col gap-3">
                 <Button tone="primary" full onClick={onDelete}>
                   Yes, delete it
                 </Button>
@@ -278,6 +347,6 @@ export default function EditForm({ drink, groups, isNew, onSave, onCancel, onDel
           Drinks in {PREPARATIONS} are linked from any ingredient with the same name.
         </p>
       ) : null}
-    </div>
+    </main>
   );
 }
