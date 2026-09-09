@@ -200,6 +200,60 @@
   }
 
   /*
+   * A drink row is glass. The fill is white worn thin over whatever soft shape happens
+   * to float behind it, blurred so the colour arrives as a wash rather than a picture,
+   * with a sheen laid diagonally across the top left and a hairline of light along the
+   * top edge. The edge, the hard shadow and the press are the sticker's, unchanged. Only
+   * rows are glass: fields, buttons, the search box and the masthead stay solid.
+   */
+  .glass {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--panel);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      3px 3px 0 var(--bubble);
+  }
+
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0) 45%
+    );
+    transition: transform 120ms ease-out;
+  }
+
+  /* The one thing a press changes here beyond the sticker's move: the light slides. */
+  .glass:active::before {
+    transform: translateX(12px);
+  }
+
+  .glass.press:active:not(:disabled) {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      1px 1px 0 var(--bubble);
+  }
+
+  /*
+   * Only where the browser can blur what is behind it does the fill go translucent.
+   * Everywhere else the row falls back to the plain sticker fill, so the text keeps its
+   * ground and nothing is left sitting on a smear of colour.
+   */
+  @supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) {
+    .glass {
+      background-color: rgba(255, 255, 255, 0.62);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+  }
+
+  /*
    * The masthead. A wordmark in the corner is what every app does, so this one is a
    * sticker in the middle of the screen, never stuck on quite straight, with a heavier
    * shadow than the controls because nothing else on Home is centred.

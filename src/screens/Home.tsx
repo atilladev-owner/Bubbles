@@ -34,6 +34,24 @@ function Masthead() {
   );
 }
 
+/**
+ * Four soft shapes fixed to the ground, large and slow, so whatever she has scrolled to
+ * there is always colour behind the glass. They never move and they never carry text.
+ */
+function Ground() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+    >
+      <span className="circle absolute top-[20%] -left-20 h-65 w-65 bg-bubble" />
+      <span className="circle absolute top-[44%] -right-16 h-50 w-50 bg-wash" />
+      <span className="circle absolute top-[68%] -left-16 h-58 w-58 bg-bubble" />
+      <span className="circle absolute -bottom-10 right-[12%] h-45 w-45 bg-wash" />
+    </div>
+  );
+}
+
 /** Add drink takes the width that is left, More takes what it needs. */
 function Controls({ onAdd, onMore }: { onAdd: () => void; onMore: () => void }) {
   return (
@@ -73,7 +91,7 @@ function DrinkRow({
       type="button"
       onClick={onOpen}
       className={
-        'sticker press flex min-h-18 w-full items-center justify-between gap-3 rounded-md ' +
+        'sticker glass press flex min-h-18 w-full items-center justify-between gap-3 rounded-md ' +
         'px-4 py-3 text-left ' +
         (place === null ? '' : 'enter')
       }
@@ -149,9 +167,10 @@ export default function Home({
 
   return (
     <main
-      className="mx-auto w-full max-w-[560px] px-4"
+      className="relative z-10 mx-auto w-full max-w-[560px] px-4"
       style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}
     >
+      {isEmpty ? null : <Ground />}
       <Masthead />
 
       {isEmpty ? (
