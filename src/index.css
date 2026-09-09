@@ -57,6 +57,7 @@
   --color-accent: #c93a6b;
   --color-accent-deep: #a62c57;
   --color-bubble: #f6c6d6;
+  --color-edge: #c97a99;
 
   --font-display: "Fredoka", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   --font-sans: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -67,9 +68,12 @@
   --text-15: 15px;
   --text-17: 17px;
   --text-20: 20px;
+  --text-22: 22px;
   --text-24: 24px;
+  --text-28: 28px;
   --text-30: 30px;
   --text-38: 38px;
+  --text-44: 44px;
 
   /* Three radii, and no capsule. Circles are drawn by hand where they belong. */
   --radius-*: initial;
@@ -77,10 +81,9 @@
   --radius-md: 16px;
   --radius-lg: 22px;
 
-  /* Shadows lean into the accent, never grey. Nothing else casts one. */
+  /* The sheet keeps the one soft shadow. Every other shadow is a hard sticker offset. */
   --shadow-*: initial;
   --shadow-sheet: 0 10px 30px rgba(201, 58, 107, 0.1);
-  --shadow-row: 0 1px 0 rgba(201, 58, 107, 0.06);
 }
 
 /* The spec names the tokens without a namespace, so keep those readable too. */
@@ -94,6 +97,7 @@
   --accent: var(--color-accent);
   --accent-deep: var(--color-accent-deep);
   --bubble: var(--color-bubble);
+  --edge: var(--color-edge);
   color-scheme: light;
 }
 
@@ -139,6 +143,106 @@
     border-radius: 4px;
   }
 
+  ::selection {
+    background: var(--wash);
+    color: var(--ink);
+  }
+}
+
+@layer components {
+  /*
+   * The one material. A soft flat shape with a firm edge and a hard offset shadow,
+   * the way a puffy sticker sits on a notebook. Every row, every field, every button
+   * and the search box wears it, and nothing else carries a border or a shadow.
+   */
+  .sticker {
+    background-color: var(--panel);
+    border: 2px solid var(--edge);
+    box-shadow: 3px 3px 0 var(--bubble);
+  }
+
+  /* The primary tier: filled accent, white text, the shadow in the deeper accent. */
+  .sticker-accent {
+    background-color: var(--accent);
+    border-color: var(--accent-deep);
+    box-shadow: 3px 3px 0 var(--accent-deep);
+    color: var(--color-white);
+  }
+
+  /*
+   * A pressed sticker moves onto its shadow: the face travels two pixels down and to
+   * the right while the offset shrinks by the same two, so the shadow stays exactly
+   * where it was and the gap closes. Both halves have to move together or the shadow
+   * jumps, so the offset rides the same 120ms as the transform.
+   */
+  .press {
+    transition:
+      transform 120ms ease-out,
+      box-shadow 120ms ease-out;
+  }
+
+  .press:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--bubble);
+  }
+
+  .sticker-accent.press:active:not(:disabled) {
+    box-shadow: 1px 1px 0 var(--accent-deep);
+  }
+
+  /*
+   * Quiet controls carry no sticker: a word or an icon in the muted tone that goes to
+   * the deeper accent while it is held. The change is instant, because a tap wants an
+   * answer rather than a fade.
+   */
+  .quiet:active:not(:disabled) {
+    color: var(--accent-deep);
+  }
+
+  /* Fields are stickers 52px tall, with the label above and never a placeholder for it. */
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background-color: var(--panel);
+    border: 2px solid var(--edge);
+    box-shadow: 3px 3px 0 var(--bubble);
+    font-size: 17px;
+    color: var(--ink);
+  }
+
+  input.field,
+  select.field {
+    height: 52px;
+    padding-block: 0;
+  }
+
+  /* The group picker keeps the native list underneath and shows our own chevron. */
+  select.field {
+    appearance: none;
+    padding-right: 44px;
+  }
+
+  /* Room for the search icon on the left of the search box. */
+  .field-lead {
+    padding-left: 44px;
+  }
+
+  /* In focus the border becomes the ring, so no outline is drawn on top of it. */
+  .field:focus {
+    border-color: var(--accent);
+  }
+
+  .field:focus-visible {
+    outline: none;
+  }
+
+  .field::placeholder {
+    color: var(--muted);
+  }
+
   /* The note keeps one fixed height and scrolls inside itself when it runs long, with a
      thin bar in the bubble tint. Browsers that draw overlay bars, iOS among them, show their
      own bar and ignore the colours, so the field still scrolls the same everywhere. */
@@ -169,9 +273,23 @@
     background: var(--accent);
   }
 
-  ::selection {
-    background: var(--wash);
-    color: var(--ink);
+  /*
+   * The list arrives once, on the first render, and never again: each row rises eight
+   * pixels into place behind the one above it. Only transform and opacity move.
+   */
+  .enter {
+    animation: rise 180ms ease-out both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -184,17 +302,12 @@
   border-radius: 50%;
 }
 
-@utility press {
-  transition:
-    transform 120ms ease-out,
-    background-color 120ms ease-out;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: -1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
