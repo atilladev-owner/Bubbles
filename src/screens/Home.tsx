@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Ellipsis, GlassWater, Plus, Search } from 'lucide-react';
-import BubblesMark, { GroupMark } from '../components/BubblesMark';
-import Button from '../components/Button';
+import { GroupMark, MastheadBubbles } from '../components/BubblesMark';
 import Field, { inputClass } from '../components/Field';
 import InstallHint from '../components/InstallHint';
 import { hasGlassFigures, matchesQuery, sectionsFor } from '../lib/drinks';
@@ -20,6 +19,44 @@ type Props = {
 
 /** The stagger stops counting after this many rows, so a long book still arrives quickly. */
 const STAGGER_CAP = 12;
+
+/** The brand, centred, and the one thing in the app that is not aligned to an edge. */
+function Masthead() {
+  return (
+    <header className="masthead flex items-center justify-center">
+      <div className="relative flex items-center justify-center">
+        <MastheadBubbles className="pointer-events-none absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2" />
+        <h1 className="sticker masthead-mark relative z-10 rounded-lg text-44 leading-none text-ink">
+          Bubbles
+        </h1>
+      </div>
+    </header>
+  );
+}
+
+/** Add drink takes the width that is left, More takes what it needs. */
+function Controls({ onAdd, onMore }: { onAdd: () => void; onMore: () => void }) {
+  return (
+    <div className="flex items-stretch gap-2">
+      <button
+        type="button"
+        onClick={onAdd}
+        className="sticker sticker-accent press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-md px-4"
+      >
+        <Plus size={18} aria-hidden="true" />
+        <span className="text-17 font-bold">Add drink</span>
+      </button>
+      <button
+        type="button"
+        onClick={onMore}
+        className="sticker press inline-flex h-11 shrink-0 items-center gap-2 rounded-md px-4 text-accent-deep"
+      >
+        <Ellipsis size={18} aria-hidden="true" />
+        <span className="text-17 font-bold">More</span>
+      </button>
+    </div>
+  );
+}
 
 function DrinkRow({
   drink,
@@ -110,56 +147,26 @@ export default function Home({
   return (
     <main
       className="mx-auto w-full max-w-[560px] px-4"
-      style={{
-        paddingTop: 'max(1rem, env(safe-area-inset-top))',
-        paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))',
-      }}
+      style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}
     >
-      <header className="relative isolate">
-        <BubblesMark
-          size={120}
-          className="pointer-events-none absolute -top-13 -left-5 z-0"
-        />
-        <div className="relative z-10 flex min-h-16 items-end justify-between gap-3">
-          <h1 className="text-44 leading-none text-ink">Bubbles</h1>
-          <div className="flex shrink-0 items-center gap-2">
-            {isEmpty ? null : (
-              <button
-                type="button"
-                onClick={onAddDrink}
-                className="sticker sticker-accent press inline-flex min-h-11 items-center gap-1.5 rounded-md px-3"
-              >
-                <Plus size={18} aria-hidden="true" />
-                <span className="text-15 font-bold">Add</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={onOpenMore}
-              className="sticker press inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 text-accent-deep"
-            >
-              <Ellipsis size={18} aria-hidden="true" />
-              <span className="text-15 font-bold">More</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {showInstallHint ? <InstallHint onDismiss={onDismissInstallHint} /> : null}
+      <Masthead />
 
       {isEmpty ? (
-        <div className="mt-16 flex flex-col items-center gap-6 text-center">
-          <BubblesMark size={160} />
-          <p className="text-17 text-muted">
+        <>
+          <p className="mx-auto mt-4 max-w-[30ch] text-center text-17 text-muted">
             No drinks yet. Add the first one and it stays on this phone.
           </p>
-          <Button onClick={onAddDrink}>
-            <Plus size={18} aria-hidden="true" />
-            Add
-          </Button>
-        </div>
+          <div className="mt-6">
+            <Controls onAdd={onAddDrink} onMore={onOpenMore} />
+          </div>
+          {showInstallHint ? <InstallHint onDismiss={onDismissInstallHint} /> : null}
+        </>
       ) : (
         <>
+          <Controls onAdd={onAddDrink} onMore={onOpenMore} />
+
+          {showInstallHint ? <InstallHint onDismiss={onDismissInstallHint} /> : null}
+
           <div className="mt-6">
             <Field label="Search" htmlFor="search">
               <div className="relative">

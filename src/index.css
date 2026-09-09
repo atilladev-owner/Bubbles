@@ -199,6 +199,24 @@
     color: var(--accent-deep);
   }
 
+  /*
+   * The masthead. A wordmark in the corner is what every app does, so this one is a
+   * sticker in the middle of the screen, never stuck on quite straight, with a heavier
+   * shadow than the controls because nothing else on Home is centred.
+   */
+  .masthead {
+    height: 168px;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    overflow: hidden;
+  }
+
+  .masthead-mark {
+    padding: 12px 26px;
+    box-shadow: 5px 5px 0 var(--bubble);
+    transform: rotate(-3deg);
+  }
+
   /* Fields are stickers 52px tall, with the label above and never a placeholder for it. */
   .field {
     display: block;

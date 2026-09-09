@@ -1,27 +1,23 @@
-import { MARK_BUBBLE, MARK_CIRCLES, MARK_VIEWBOX, MARK_WASH } from '../lib/mark';
+import { MARK_BUBBLE, MARK_WASH } from '../lib/mark';
 
-type Props = { size: number; className?: string };
-
-/** The identity cluster. Decorative only, so it is hidden from assistive tech. */
-export default function BubblesMark({ size, className }: Props) {
+/**
+ * The masthead cluster: two bubbles peeking from behind the wordmark's top right and one
+ * larger one low on its left. The sticker sits opaque on top of it, so nothing here ever
+ * crosses a letter. Decorative, so it is hidden from assistive tech.
+ */
+export function MastheadBubbles({ className }: { className?: string }) {
   return (
     <svg
-      viewBox={MARK_VIEWBOX}
-      width={size}
-      height={size}
+      viewBox="0 0 200 160"
+      width={200}
+      height={160}
       aria-hidden="true"
       focusable="false"
       className={className}
     >
-      {MARK_CIRCLES.map((circle) => (
-        <circle
-          key={circle.cx + ':' + circle.cy}
-          cx={circle.cx}
-          cy={circle.cy}
-          r={circle.r}
-          fill={circle.fill}
-        />
-      ))}
+      <circle cx="148" cy="30" r="26" fill={MARK_BUBBLE} />
+      <circle cx="186" cy="34" r="15" fill={MARK_WASH} />
+      <circle cx="34" cy="126" r="33" fill={MARK_BUBBLE} />
     </svg>
   );
 }
