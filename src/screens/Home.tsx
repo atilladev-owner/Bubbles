@@ -3,7 +3,7 @@ import { Ellipsis, GlassWater, Plus, Search } from 'lucide-react';
 import { GroupMark, MastheadBubbles } from '../components/BubblesMark';
 import Field, { inputClass } from '../components/Field';
 import InstallHint from '../components/InstallHint';
-import { hasGlassFigures, matchesQuery, sectionsFor } from '../lib/drinks';
+import { hasGlassFigures, rankDrinks, sectionsFor } from '../lib/drinks';
 import type { Drink } from '../types';
 
 type Props = {
@@ -121,11 +121,14 @@ export default function Home({
     mounted.current = true;
   }, []);
 
-  const found = useMemo(
-    () => drinks.filter((drink) => matchesQuery(drink, query)),
-    [drinks, query],
+  // While she is typing the groups step aside: one flat list, best match first, so the
+  // drink she means is under her thumb from the first letters.
+  const searching = query.trim() !== '';
+  const found = useMemo(() => rankDrinks(drinks, query), [drinks, query]);
+  const sections = useMemo(
+    () => (searching ? [] : sectionsFor(drinks, groupOrder)),
+    [searching, drinks, groupOrder],
   );
-  const sections = useMemo(() => sectionsFor(found, groupOrder), [found, groupOrder]);
 
   // One running count down the whole list, so the stagger reads as a single arrival
   // rather than restarting inside every group.
@@ -190,6 +193,23 @@ export default function Home({
 
           {nothingFound ? (
             <p className="mt-10 text-17 text-muted">Nothing matches that yet.</p>
+          ) : null}
+
+          {searching && !nothingFound ? (
+            <section className="mt-8">
+              <h2 className="sr-only">Results</h2>
+              <ul className="flex flex-col gap-3">
+                {found.map((drink) => (
+                  <li key={'found:' + drink.id}>
+                    <DrinkRow
+                      drink={drink}
+                      place={null}
+                      onOpen={() => onOpenDrink(drink.id)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
           ) : null}
 
           {sections.map((section) => (
