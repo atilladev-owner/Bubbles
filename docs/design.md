@@ -34,7 +34,8 @@ computed ratios in the report.
 | `--muted` | `#7A6273` | secondary text, labels |
 | `--accent` | `#C93A6B` | the one accent: primary action, active switch, links |
 | `--accent-deep` | `#A62C57` | pressed and focused accent |
-| `--bubble` | `#F6C6D6` | decorative bubbles only, never text |
+| `--bubble` | `#F6C6D6` | decorative bubbles, pour bars and sticker shadows, never text |
+| `--edge` | `#E7B4C6` | the 2px sticker border on every row, field and button |
 
 Shadows are tinted toward the accent, never grey or black: `0 10px 30px rgba(201, 58,
 107, 0.10)` on sheets, `0 1px 0 rgba(201, 58, 107, 0.06)` under list rows. Nothing else
@@ -49,13 +50,57 @@ in the built page. Scale in px: 13, 15, 17, 20, 24, 30, 38. Body is 17 on the ph
 because it is read at arm's length in a dim bar. Measurements in the recipe render at 24
 in Fredoka with `font-variant-numeric: tabular-nums`.
 
-## Shape
+## Shape and material: the sticker language
 
-Radius scale: 10 on small controls, 16 on rows and inputs, 22 on cards and sheets, and
-that is the whole scale. Nothing containing text or content is a capsule. The only full
-circles are the decorative bubbles and the favourite mark's dot. Buttons are solid accent
-with white text or a `--wash` ground with `--accent` text; both pairs are checked for
-contrast in the report. Active state is a 2 percent scale down over 120ms.
+The first build used white cards with hairline borders and plain bordered inputs, and it
+read as a default component library. That is not the product. Bubbles has one material,
+the sticker: a soft flat shape with a firm edge and a hard offset shadow, the way a
+puffy sticker sits on a notebook. It is cute, tactile, and it belongs to nobody's
+template.
+
+- **The sticker.** A surface on `--panel` with a 2px border in `--edge` (`#E7B4C6`) and a
+  hard shadow of `3px 3px 0 var(--bubble)`, no blur. Radius scale: 10 on small controls,
+  16 on rows, inputs and buttons, 22 on sheets. That is the whole scale, and nothing that
+  holds text is a capsule. Every row, every field, every button and the search box is a
+  sticker. Nothing else has a border or a shadow.
+- **The press.** A sticker pressed moves onto its shadow: `translate(2px, 2px)` and the
+  shadow shrinks to `1px 1px 0`, 120ms ease-out, on `:active`. Buttons, rows and the
+  switch all press. It is the one motion the user sees on every tap, so it is short.
+- **Focus.** A field in focus keeps its shadow and turns its border `--accent`, 2px, no
+  outline ring, since the border is the ring. Keyboard focus on anything else is the 2px
+  `--accent-deep` outline as before.
+- **Buttons.** Primary is a sticker filled `--accent` with white text and a `--accent-deep`
+  shadow. Secondary is a sticker on `--panel` with `--accent-deep` text. Quiet controls,
+  such as the back link and the ingredient row tools, have no sticker: text or an icon in
+  `--muted`, pressing to `--accent-deep`.
+- **Fields.** A sticker with 17px text, 52px tall, label above in Fredoka 15 weight 500
+  in `--ink`, never a placeholder as the label. The Group select is the same sticker with
+  a chevron icon on the right and the native picker underneath. The note field keeps its
+  fixed height and inner scroll.
+- **Descriptive marks are never boxed.** The glass mark, the favourite state, the "as
+  written" note and the ingredient count are plain text or an icon in `--muted` or a dot.
+  Chips, tags and badges are pills whatever their radius, and they do not exist here.
+
+## Tables and numbers: the pour bars
+
+The recipe table is the reason the app exists, so it carries the one piece of visual
+information a plain table cannot. Under every gram figure sits a pour bar: a 6px bar in
+`--bubble` whose width is that figure's share of the largest gram figure in the same
+column, so the ratios of a recipe are visible at a glance and a bartender can see that
+the soda is three times the syrup without reading. The bar under the column the switch has
+selected is `--accent`. Values that are not grams, and blanks, have no bar. Measurements
+render in Fredoka 28, weight 500, tabular. Ingredient names are Nunito 17. Rows are
+separated by a 2px `--wash` rule rather than a hairline. The table header is Fredoka 15 in
+`--muted`.
+
+## Home rhythm
+
+Group headings are Fredoka 24 weight 600 in `--ink`, each with a small three bubble mark to
+its left in `--bubble` and `--wash`, and generous space above so the list breathes in
+sections rather than running as one column. Rows are stickers with the name in Fredoka 22
+and the ingredient count under it; the glass mark sits right in `--muted`. Rows enter once,
+on first render, rising 8px with a 30ms stagger, and never again. The wordmark is Fredoka
+44 over a bigger bubble cluster, 120px, that overlaps the top edge of the screen.
 
 ## The bubbles
 
