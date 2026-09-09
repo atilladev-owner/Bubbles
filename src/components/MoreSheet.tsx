@@ -72,8 +72,8 @@ export default function MoreSheet({
             transition={{ duration, ease: 'easeOut' }}
           >
             <div
-              className="px-4 pt-4"
-              style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+              className="px-4 pt-5"
+              style={{ paddingBottom: 'calc(1.75rem + env(safe-area-inset-bottom))' }}
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-24 text-ink">More</h2>
@@ -82,7 +82,7 @@ export default function MoreSheet({
                   type="button"
                   onClick={onClose}
                   aria-label="Close"
-                  className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-sm text-muted press active:scale-[0.98] active:bg-wash"
+                  className="quiet -mr-2 inline-flex h-11 w-11 items-center justify-center text-muted"
                 >
                   <X size={20} aria-hidden="true" />
                 </button>
@@ -96,7 +96,7 @@ export default function MoreSheet({
                 <p className="text-13 text-muted">{readableDate(lastBackupAt)}</p>
               </div>
 
-              <div className="mt-6 flex flex-col gap-2">
+              <div className="mt-6 flex flex-col gap-3">
                 {confirmingRestore ? (
                   <>
                     <p className="text-15 text-muted">
@@ -135,12 +135,12 @@ export default function MoreSheet({
               </div>
 
               {notice === null ? null : (
-                <p role="status" className="mt-4 text-15 text-accent">
+                <p role="status" className="mt-4 text-15 font-bold text-accent">
                   {notice}
                 </p>
               )}
 
-              <div className="mt-6 rounded-md bg-wash p-4">
+              <div className="mt-6 border-t-2 border-wash pt-5">
                 <p className="text-15 text-ink">
                   Add Bubbles to your home screen: tap Share, then Add to Home Screen.
                 </p>
