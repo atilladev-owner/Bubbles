@@ -61,7 +61,10 @@ export function orderGroups(drinks: Drink[], stored: string[]): string[] {
 
 export type Section = { key: string; heading: string; drinks: Drink[] };
 
-/** Favourites first, then every group in order, with empty groups left out. */
+/**
+ * Favourites first, then every group in order, with empty groups left out. A favourite
+ * shows once, under Favourites, and not again inside its own group.
+ */
 export function sectionsFor(drinks: Drink[], groupOrder: string[]): Section[] {
   const byName = (a: Drink, b: Drink) => a.name.localeCompare(b.name);
   const sections: Section[] = [];
@@ -72,7 +75,9 @@ export function sectionsFor(drinks: Drink[], groupOrder: string[]): Section[] {
   }
 
   for (const group of groupOrder) {
-    const inGroup = drinks.filter((drink) => drink.group === group).sort(byName);
+    const inGroup = drinks
+      .filter((drink) => drink.group === group && !drink.favourite)
+      .sort(byName);
     if (inGroup.length > 0) {
       sections.push({ key: 'group:' + group, heading: group, drinks: inGroup });
     }
