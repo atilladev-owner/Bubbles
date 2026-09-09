@@ -1,0 +1,5 @@
+Fredoka and Nunito are licensed under the SIL Open Font License, Version 1.1.
+The files here are the latin and latin extended subsets of the variable fonts
+as published on Google Fonts.
+
+License text: https://openfontlicense.org/open-font-license-official-text/
