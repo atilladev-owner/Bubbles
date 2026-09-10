@@ -32,6 +32,7 @@ computed ratios in the report.
 | `--line` | `#F1D9E2` | hairlines, input borders |
 | `--ink` | `#2E1F2B` | text |
 | `--muted` | `#7A6273` | secondary text, labels |
+| `--muted-deep` | `#634B5B` | secondary text on a glass row only; holds 5.2:1 over the darkest fill a row can sit on |
 | `--accent` | `#C93A6B` | the one accent: primary action, active switch, links |
 | `--accent-deep` | `#A62C57` | pressed and focused accent |
 | `--bubble` | `#F6C6D6` | decorative bubbles, pour bars and sticker shadows, never text |
@@ -274,19 +275,24 @@ tests, and the spreadsheet import file is regenerated with the same rule.
 
 ## Glass drink cards
 
-Drink rows on Home are glass, by the owner's explicit direction. Behind the list float four
-large soft shapes in `--bubble` and `--wash`, 180 to 260px, fixed to the ground and placed
-so at least one sits behind any screenful of rows; they never move, and they carry no
-text. A drink row is a sticker whose fill is `rgba(255, 255, 255, 0.62)` with
-`backdrop-filter: blur(14px)` and a sheen: a diagonal band from `rgba(255, 255, 255,
-0.55)` at the top left to transparent by 45 percent, laid over the fill, and a 1px inner
-highlight in `rgba(255, 255, 255, 0.8)` along the top edge. The edge, the hard shadow and
-the press stay exactly as every sticker's. On press the sheen shifts 12px to the right,
-120ms ease-out, and nothing else changes. Text contrast is computed against the darkest
-ground a row can sit over, `--bubble` blended at 62 percent white, and every pair still
-holds 4.5:1; the report shows the numbers. Fields, buttons, the search box and the
-masthead are not glass. Any drink added later is a row, so it is glass by construction.
-Where `backdrop-filter` is unsupported the row falls back to the plain sticker fill.
+Drink rows on Home are glass, by the owner's explicit direction. Behind the list sit five
+large soft shapes, 160 to 288px, in `--bubble`, `--wash` and the accent worn thin
+(`--accent` at 45 percent over the ground, `#E7A2B9`), reaching under the column rather
+than hugging its edges, so there is real colour for the glass to show. They live outside
+the list's scroller, under it, so the phone's rubber band at either end of the list moves
+the rows and never the shapes; they never move on their own, and they carry no text. A
+drink row is a sticker whose fill is `rgba(255, 255, 255, 0.42)` with `backdrop-filter:
+blur(22px) saturate(1.35)`, a broad sheen falling in from the top left (`rgba(255, 255,
+255, 0.8)` to transparent by 58 percent), a thin reflection running across the face at
+112 degrees, and 1px inner highlights along the top and bottom edges. The light sits under
+the text, never over it. The edge, the hard shadow and the press stay exactly as every
+sticker's; on press the light shifts 14px to the right, 120ms ease-out, and nothing else
+changes. The drink name is `--ink`; the ingredient count and the glass mark are
+`--muted-deep`, because the darkest fill a row can sit over is the accent worn thin under
+42 percent white, `#F1C9D6`, and `--muted` holds only 3.7:1 there. Fields, buttons, the
+search box and the masthead are not glass. Any drink added later is a row, so it is glass
+by construction. Where `backdrop-filter` is unsupported the row falls back to the plain
+sticker fill.
 
 ## The maker's mark
 
@@ -296,6 +302,12 @@ a link to https://atilladev.vercel.app reading "Product of Atilla Dev" in `--mut
 with the crest at 22px to its left, the black crest on this light theme. The crest files
 live under `public/` as `atilla-crest-black.webp`. No fixed overlay and no watermark
 behind content on a 390px screen: the sheet foot is the one place it fits.
+
+From 768px wide the app carries the mark the way every other Atilla Dev build does as
+well: a fixed sticker plate at the bottom right, 18px from either edge, 44px tall, with
+the crest at 24px and "Product of Atilla Dev" in Nunito 13 bold `--muted`, linking to the
+same address, and behind it the faint crest, 380px, at 6 percent opacity, bleeding off
+the right edge. Both are hidden below 768px.
 
 ## Quality gates
 
