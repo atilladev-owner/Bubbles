@@ -78,7 +78,7 @@ The file is plain JSON and looks like this:
 
 ## Example drinks
 
-The repository ships with example drinks only: eight classic recipes anyone could know,
+The repository ships with example drinks only: eight classic drinks and two preparations anyone could know,
 loaded once when the database is empty and editable or deletable like anything else.
 
 ## Built with
