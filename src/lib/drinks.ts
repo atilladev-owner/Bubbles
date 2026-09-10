@@ -95,6 +95,29 @@ export function capitaliseDrink(drink: Drink): Drink {
   };
 }
 
+/**
+ * A book read back from the phone, brought up to the rules a save and a restore apply.
+ * The rules arrived after her first file was already on the phone, so the drinks it
+ * holds are tidied once on the way in. Reports whether anything changed, so the caller
+ * writes the book back only when it has to.
+ */
+export function tidyDrinks(drinks: Drink[]): { drinks: Drink[]; changed: boolean } {
+  let changed = false;
+  const tidy = drinks.map((drink) => {
+    const next = capitaliseDrink(drink);
+    if (
+      next.name !== drink.name ||
+      next.group !== drink.group ||
+      next.ingredients.some((row, i) => row.name !== drink.ingredients[i]?.name)
+    ) {
+      changed = true;
+      return next;
+    }
+    return drink;
+  });
+  return { drinks: changed ? tidy : drinks, changed };
+}
+
 /** The stored order first, then any group she added, and Preparations always last. */
 export function orderGroups(drinks: Drink[], stored: string[]): string[] {
   const seen = new Set<string>();

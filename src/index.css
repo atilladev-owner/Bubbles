@@ -105,14 +105,24 @@
 }
 
 @layer base {
+  /*
+   * The document itself never scrolls. The list scrolls inside its own container in the
+   * app root, so the phone's rubber band at the top and bottom moves the rows alone and
+   * the ground shapes stay exactly where they are.
+   */
   html {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
     background-color: var(--ground);
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
-    min-height: 100dvh;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
     background-color: var(--ground);
     color: var(--ink);
     font-family: var(--font-sans);

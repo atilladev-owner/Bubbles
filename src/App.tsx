@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import Home from './screens/Home';
+import Home, { Ground } from './screens/Home';
 import DrinkView from './screens/DrinkView';
 import EditForm from './screens/EditForm';
 import MoreSheet from './components/MoreSheet';
 import { shouldOfferInstall } from './components/InstallHint';
 import { EXAMPLE_DRINKS } from './data/examples';
 import { backupFilename, parseBackup, toBackup } from './lib/backup';
-import { capitaliseDrink, emptyDrink, orderGroups } from './lib/drinks';
+import { capitaliseDrink, emptyDrink, orderGroups, tidyDrinks } from './lib/drinks';
 import {
   DEFAULT_GROUPS,
   EMPTY_META,
@@ -54,7 +54,12 @@ export default function App() {
         await saveDrinks(EXAMPLE_DRINKS);
         setDrinks(EXAMPLE_DRINKS);
       } else {
-        setDrinks(storedDrinks);
+        // A book that reached the phone before the casing rules existed is brought up
+        // to them once here, and written back only when that changed something.
+        const tidied = tidyDrinks(storedDrinks);
+        if (tidied.changed) await saveDrinks(tidied.drinks);
+        if (cancelled) return;
+        setDrinks(tidied.drinks);
       }
       setGroupOrder(storedGroups ?? DEFAULT_GROUPS);
       setMeta(storedMeta);
@@ -197,10 +202,17 @@ export default function App() {
   if (!ready) return <div className="min-h-dvh bg-ground" />;
 
   return (
-    <div className="relative min-h-dvh bg-ground">
-      {/* Home steps out of reach while anything sits over it, so the Tab order and a
-          screen reader stay inside the sheet or the page that is open. */}
-      <div inert={overlayOpen || moreOpen}>
+    <div className="fixed inset-0 overflow-hidden bg-ground">
+      {/* The ground shapes sit under the list's scroller rather than inside it, so the
+          phone's rubber band at either end of the list never moves them. */}
+      {drinks.length === 0 ? null : <Ground />}
+      {/* The list scrolls inside this container, never the document. Home steps out of
+          reach while anything sits over it, so the Tab order and a screen reader stay
+          inside the sheet or the page that is open. */}
+      <div
+        inert={overlayOpen || moreOpen}
+        className="absolute inset-0 z-10 overflow-y-auto overscroll-y-contain"
+      >
         <Home
           drinks={drinks}
           groupOrder={groupOrder}

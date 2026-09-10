@@ -35,14 +35,16 @@ function Masthead() {
 }
 
 /**
- * Four soft shapes fixed to the ground, large and slow, so whatever she has scrolled to
- * there is always colour behind the glass. They never move and they never carry text.
+ * Four soft shapes on the ground, large and slow, so whatever she has scrolled to there
+ * is always colour behind the glass. They sit outside the list's scroller, under it, so a
+ * rubber band at either end of the list moves the rows and never the colour behind them.
+ * They never move on their own and they never carry text.
  */
-function Ground() {
+export function Ground() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
     >
       <span className="circle absolute top-[20%] -left-20 h-65 w-65 bg-bubble" />
       <span className="circle absolute top-[44%] -right-16 h-50 w-50 bg-wash" />
@@ -170,7 +172,6 @@ export default function Home({
       className="relative z-10 mx-auto w-full max-w-[560px] px-4"
       style={{ paddingBottom: 'calc(2.5rem + env(safe-area-inset-bottom))' }}
     >
-      {isEmpty ? null : <Ground />}
       <Masthead />
 
       {isEmpty ? (

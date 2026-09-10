@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { capitaliseDrink, matchesQuery, orderGroups, rankDrinks, sectionsFor } from './drinks';
+import { capitaliseDrink, matchesQuery, orderGroups, rankDrinks, sectionsFor, tidyDrinks } from './drinks';
 import { DEFAULT_GROUPS } from './storage';
 import type { Drink } from '../types';
 
@@ -179,5 +179,32 @@ describe('capitaliseDrink', () => {
     capitaliseDrink(rough);
     expect(rough.name).toBe('soda water');
     expect(rough.ingredients[0]?.name).toBe('soda water');
+  });
+});
+
+describe('tidyDrinks', () => {
+  it('reports nothing to do when every name already follows the rules', () => {
+    const tidy = [drink('Jim Beam & Coke', 'Highballs', false, 'Soda water')];
+    const result = tidyDrinks(tidy);
+    expect(result.changed).toBe(false);
+    expect(result.drinks).toEqual(tidy);
+  });
+
+  it('brings a book stored before the rules existed up to them', () => {
+    const rough = [
+      drink('jim beam & coke', 'Highballs', false, 'soda water'),
+      drink('Shark Rita', 'Ritas', true, 'shark mix'),
+    ];
+    const result = tidyDrinks(rough);
+    expect(result.changed).toBe(true);
+    expect(result.drinks.map((d) => d.name)).toEqual(['Jim Beam & Coke', 'Shark Rita']);
+    expect(result.drinks.map((d) => d.ingredients[0]?.name)).toEqual(['Soda water', 'Shark mix']);
+  });
+
+  it('leaves what it was given untouched', () => {
+    const rough = [drink('jim beam & coke', 'Highballs', false, 'soda water')];
+    tidyDrinks(rough);
+    expect(rough[0]?.name).toBe('jim beam & coke');
+    expect(rough[0]?.ingredients[0]?.name).toBe('soda water');
   });
 });
