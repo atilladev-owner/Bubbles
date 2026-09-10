@@ -203,6 +203,23 @@
   }
 
   /*
+   * The maker's mark on a wide screen: the plate at the bottom right and the faint crest
+   * behind it, placed the way every Atilla Dev build places them. Below 768px the More
+   * sheet carries the mark instead, so nothing floats over the list on a phone.
+   */
+  .atilla-watermark {
+    position: fixed;
+    right: -70px;
+    bottom: 56px;
+    z-index: 15;
+    width: 380px;
+    height: 380px;
+    opacity: 0.06;
+    pointer-events: none;
+    background: url('/atilla-crest-black.webp') center / contain no-repeat;
+  }
+
+  /*
    * A drink row is glass. The fill is white worn thin over whatever soft shape happens
    * to float behind it, blurred so the colour arrives as a wash rather than a picture,
    * with a sheen laid diagonally across the top left and a hairline of light along the

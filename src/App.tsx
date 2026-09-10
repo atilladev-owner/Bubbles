@@ -224,6 +224,26 @@ export default function App() {
             setMoreOpen(true);
           }}
         />
+
+        {/* The maker's mark where a wide screen has room for it: the plate and the faint
+            crest, as every Atilla Dev build carries them. The More sheet keeps the mark on
+            a phone. It sits inside this wrapper so it steps out of reach with Home. */}
+        <div className="atilla-watermark hidden md:block" aria-hidden="true" />
+        <a
+          href="https://atilladev.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sticker press fixed right-[18px] bottom-[18px] z-[16] hidden min-h-11 items-center gap-2 rounded-sm py-2 pr-3.5 pl-2 text-13 font-bold text-muted md:inline-flex"
+        >
+          <img
+            src="/atilla-crest-black.webp"
+            alt=""
+            width={400}
+            height={411}
+            className="h-6 w-auto shrink-0"
+          />
+          Product of Atilla Dev
+        </a>
       </div>
 
       <AnimatePresence>
