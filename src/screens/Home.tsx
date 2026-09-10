@@ -46,10 +46,14 @@ export function Ground() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
     >
-      <span className="circle absolute top-[20%] -left-20 h-65 w-65 bg-bubble" />
-      <span className="circle absolute top-[44%] -right-16 h-50 w-50 bg-wash" />
-      <span className="circle absolute top-[68%] -left-16 h-58 w-58 bg-bubble" />
-      <span className="circle absolute -bottom-10 right-[12%] h-45 w-45 bg-wash" />
+      {/* Deeper and larger than before, and reaching under the column rather than
+          hugging the edges, so the glass has real colour to show through it. The deep
+          tone is the accent worn thin, so the page still has one hue. */}
+      <span className="circle absolute top-[16%] -left-14 h-72 w-72 bg-accent/45" />
+      <span className="circle absolute top-[36%] -right-12 h-56 w-56 bg-bubble" />
+      <span className="circle absolute top-[54%] left-[28%] h-40 w-40 bg-wash" />
+      <span className="circle absolute top-[70%] -right-16 h-64 w-64 bg-accent/45" />
+      <span className="circle absolute -bottom-8 -left-10 h-52 w-52 bg-bubble" />
     </div>
   );
 }
@@ -103,16 +107,16 @@ function DrinkRow({
           : { animationDelay: Math.min(place, STAGGER_CAP) * 30 + 'ms' }
       }
     >
-      <span className="min-w-0">
+      <span className="relative z-1 min-w-0">
         <span className="block truncate font-display text-22 font-medium text-ink">
           {drink.name === '' ? 'Untitled drink' : drink.name}
         </span>
-        <span className="block text-15 text-muted">
+        <span className="block text-15 text-muted-deep">
           {count === 1 ? '1 ingredient' : count + ' ingredients'}
         </span>
       </span>
       {hasGlassFigures(drink) ? (
-        <span className="inline-flex shrink-0 items-center gap-1.5 text-13 font-bold text-muted">
+        <span className="relative z-1 inline-flex shrink-0 items-center gap-1.5 text-13 font-bold text-muted-deep">
           <GlassWater size={16} aria-hidden="true" />
           glass
         </span>
