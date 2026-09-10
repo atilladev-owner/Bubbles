@@ -25,8 +25,10 @@ phone is the surface it was designed for.
 - **Everything is editable.** Name, group, note and the ingredient rows, with up and down
   controls for reordering, because drag and drop is unreliable on a wet phone.
 - **Backup and restore.** A single JSON file you keep wherever you like.
-- **No accounts, no tracking, no network calls.** The fonts and the icons are served from
-  the app itself.
+- **No accounts, and nothing about the drinks ever leaves the phone.** The fonts and the
+  icons are served from the app itself. Once installed on the home screen it makes no
+  network calls at all. The hosted address, opened in a browser, counts a page view
+  through Vercel Web Analytics and nothing more.
 
 ## Running it
 
