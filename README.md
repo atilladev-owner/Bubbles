@@ -1,8 +1,8 @@
 # Bubbles
 
-A bartender's pocket recipe book. It lives on one phone, works with no signal, halves a
-recipe in one tap, and keeps every drink editable. Nothing is shared, nothing needs
-an account, and there is no server behind it.
+A bartender's pocket recipe book. Anyone can install it, and the book you keep lives on
+your own phone. It works with no signal, halves a recipe in one tap, and keeps every drink
+editable. Nothing is shared, nothing needs an account, and there is no server behind it.
 
 It is built for a 390px phone screen held one handed behind a bar. Desktop works, but the
 phone is the surface it was designed for.

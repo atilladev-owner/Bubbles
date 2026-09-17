@@ -1,8 +1,12 @@
 # Bubbles design
 
-A bartender's pocket recipe book for one person. It installs to an iPhone home screen,
-works with no signal, halves a recipe in one tap, and keeps every drink editable.
-Nothing is shared, nothing needs an account, and nothing costs anything to run.
+A bartender's pocket recipe book. Anyone can install it, and each phone keeps its own
+book. It installs to an iPhone home screen, works with no signal, halves a recipe in one
+tap, and keeps every drink editable. Nothing is shared, nothing needs an account, and
+nothing costs anything to run.
+
+The "she" in this document is the working bartender the first build was shaped around.
+She stands for whoever is behind the bar with the phone, not for an only owner.
 
 ## Reading
 
