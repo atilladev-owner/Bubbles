@@ -1,7 +1,7 @@
 # Bubbles design
 
 A bartender's pocket recipe book for one person. It installs to an iPhone home screen,
-works with no signal, halves a glass recipe in one tap, and keeps every drink editable.
+works with no signal, halves a recipe in one tap, and keeps every drink editable.
 Nothing is shared, nothing needs an account, and nothing costs anything to run.
 
 ## Reading
@@ -90,8 +90,10 @@ The recipe table is the reason the app exists, so it carries the one piece of vi
 information a plain table cannot. Under every gram figure sits a pour bar: a 6px bar in
 `--bubble` whose width is that figure's share of the largest gram figure in the same
 column, so the ratios of a recipe are visible at a glance and a bartender can see that
-the soda is three times the syrup without reading. The bar under the column the switch has
-selected is `--accent`. Values that are not grams, and blanks, have no bar. Measurements
+the soda is three times the syrup without reading. The bars in the glass column are
+`--accent` and the bars in the jar column stay `--bubble`. The switch halves both columns
+together, so the ratios, and the bars, never change with it. Values that are not grams,
+and blanks, have no bar. Measurements
 render in Fredoka 28, weight 500, tabular. Ingredient names are Nunito 17. Rows are
 separated by a 2px `--wash` rule rather than a hairline. The table header is Fredoka 15 in
 `--muted`.
@@ -145,7 +147,8 @@ The wordmark with the bubbles behind it, a search field, then the list, under th
 first under a "Favourites" heading, then every group in the order Ritas, Slushes,
 Makgeolli, Ades, Soju, Highballs, and any group the user added, and Preparations last.
 Each row is the drink name in Fredoka 20 and, in `--muted`, the count of ingredients; a
-row with a glass figure carries a small "glass" mark so she knows it can be halved. Typing
+row with a glass figure carries a small "glass" mark so she knows it has a per glass
+recipe as well as the jar. Typing
 in the search filters rows as she types, across every group, matching the drink name and
 any ingredient name. "Add drink" and "More" are the control row under the masthead;
 nothing floats over the list, and the list ends in plain space above the safe area.
@@ -155,11 +158,14 @@ yet, and the same control row.
 ### Drink
 
 Back control top left, the drink name as the `h1`, the group under it in `--muted`, a
-favourite toggle top right. Then, only when at least one ingredient has a glass figure, a
-two option switch: "Glass" and "Half glass". Then the recipe as a table with three columns,
-ingredient, jar, glass; the glass column is omitted entirely on a drink with no glass
-figures. The glass column shows the halved figures when Half glass is selected, and any
-value that could not be halved shows as written with a small "as written" note under it.
+favourite toggle top right. Then a two option switch, "Full" and "Half", on every drink
+that has a figure of any kind, preparations included. There is one switch and not one per
+column, because a second would take the top of the screen. A drink always opens on Full,
+a preparation reached through a link from a drink on Half included. Then the recipe as a
+table with three columns, ingredient, jar, glass; the glass column is omitted entirely on a
+drink with no glass figures. On Half both the jar column and the glass column show their
+halved figures, and any value that could not be halved shows as written with a small "as
+written" note under it, in either column.
 The note, if the drink has one, sits under the table in `--muted`. An ingredient whose name
 matches a preparation exactly, case insensitive, is a link to that preparation. An "Edit"
 button at the bottom opens the edit form on the same route.
@@ -212,7 +218,7 @@ every mutation writes through. A preparation is a drink whose group is `Preparat
 
 The repository ships with an example set in `src/data/examples.ts`: six drinks and two
 preparations, all classic bar recipes anyone could know, with realistic gram measurements,
-two of them carrying glass figures so the halving switch shows. Names, measurements and
+two of them carrying glass figures so the glass column shows. Names, measurements and
 groups in the examples are not from any real establishment. The example set loads only
 when the database is empty.
 
@@ -220,7 +226,10 @@ when the database is empty.
 
 Implemented in `src/lib/measure.ts` and covered by Vitest before the UI uses it.
 
-- Only glass figures are ever halved. Jar figures are never transformed.
+- Jar figures and glass figures are halved by the same rules, together, by the one switch.
+  This holds for every drink and every preparation, and for any added later, because it
+  is a property of the drink screen and not of a drink. Nothing stored is ever changed:
+  halving happens only on the way to the screen.
 - A figure is halvable when it starts with a number and the unit after it, if any, is one
   that divides: none at all, `g`, `kg`, `mg`, `ml`, `cl`, `dl`, `l`, `oz`, `bottle`,
   `bottles`, `shot`, `shots`, `cup`, `cups`, `tsp`, `tbsp`. The number is halved, rounded
@@ -230,6 +239,8 @@ Implemented in `src/lib/measure.ts` and covered by Vitest before the UI uses it.
   mark it: a blank, `1ea`, `10cm`, `2ea (10cm)`, `1/2ea`, `4 slices`, `1 wedge`, a word.
   Counts and lengths are never split, because half a lemon slice is not a thing she pours.
 - The function is pure: `halve(value: string): { value: string; asWritten: boolean }`.
+  The screen reads every figure through `measured(value, half)`, which returns it as typed
+  on Full and halved on Half.
 
 Tests cover every example above, the empty string, whitespace padding, a decimal that
 halves to a quarter (`1.5` gives `0.75`, which rounds to `1` under the nearest 0.5 rule and
@@ -272,6 +283,24 @@ The rule runs in two places so it holds for every drink she will ever add: on sa
 edit form, and on restore for every drink in the file. It never runs on display, so what
 is shown is exactly what is stored. It lives in `src/lib/text.ts` as pure functions with
 tests, and the spreadsheet import file is regenerated with the same rule.
+
+## Names in full
+
+Her spreadsheet shortens makgeolli to "mak.g", and the book came over with it: "Peach mak.g
+mix" in the drinks, "Peach Makgeolli Mix" in Preparations. A link needs the two names to be
+exactly the same, so those ingredients stayed plain text. The shorthand is therefore never
+stored. Wherever "mak.g" stands as a word of its own in a drink name or an ingredient name,
+in any casing, it is written in full, and the casing rules then apply as they would to
+anything else. An ingredient that was in the shorthand and, once in full, is exactly a
+preparation takes that preparation's name as it is stored, so it reads "Peach Makgeolli
+Mix" and links. One that answers to no preparation yet is still written in full, and links
+the moment that preparation is saved. Figures, notes and groups are never touched.
+
+The rule runs over the whole book, not one drink, because saving either end of a link can
+complete it: when the book is read from the phone at start, which is how a book already on
+a phone is repaired, on every save, and on restore. It is `tidyDrinks` in
+`src/lib/drinks.ts`, pure, with tests, and running it twice changes nothing the second
+time.
 
 ## Glass drink cards
 

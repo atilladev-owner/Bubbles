@@ -23,9 +23,14 @@ export function emptyDrink(group: string): Drink {
   };
 }
 
-/** A drink can be halved only when at least one ingredient carries a glass figure. */
+/** The glass column, and the glass mark on Home, show when any row has a glass figure. */
 export function hasGlassFigures(drink: Drink): boolean {
   return drink.ingredients.some((row) => row.glass.trim() !== '');
+}
+
+/** A drink gets the Full and Half switch when any row carries a figure, jar or glass. */
+export function hasFigures(drink: Drink): boolean {
+  return drink.ingredients.some((row) => row.jar.trim() !== '' || row.glass.trim() !== '');
 }
 
 export function isPreparation(drink: Drink): boolean {
@@ -95,23 +100,55 @@ export function capitaliseDrink(drink: Drink): Drink {
   };
 }
 
+/** Her spreadsheet's shorthand for makgeolli, as in "Peach mak.g mix". */
+const MAKGEOLLI_SHORTHAND = /\bmak\.g\b/gi;
+
+function hasShorthand(value: string): boolean {
+  return value.search(MAKGEOLLI_SHORTHAND) !== -1;
+}
+
+/** The word written in full. The casing rules lift it afterwards wherever they would. */
+function inFull(value: string): string {
+  return value.replace(MAKGEOLLI_SHORTHAND, 'makgeolli');
+}
+
 /**
- * A book read back from the phone, brought up to the rules a save and a restore apply.
- * The rules arrived after her first file was already on the phone, so the drinks it
- * holds are tidied once on the way in. Reports whether anything changed, so the caller
- * writes the book back only when it has to.
+ * The whole book brought up to the rules: the shorthand written in full in every drink
+ * name and ingredient name, and every name cased as a save would case it. An ingredient
+ * written in the shorthand never met its preparation, so "Peach mak.g mix" stayed plain
+ * text beside a "Peach Makgeolli Mix" she could have tapped through to. Once it is in full
+ * and is exactly a preparation, it takes that preparation's name as it is stored.
+ *
+ * It runs when the book is read back from the phone, when a drink is saved and when a file
+ * is restored, because the rules arrived after her first file was already on the phone and
+ * a link can appear the moment either end of it is saved. Reports whether anything changed,
+ * so the caller writes the book back only when it has to.
  */
 export function tidyDrinks(drinks: Drink[]): { drinks: Drink[]; changed: boolean } {
+  const cased = drinks.map((drink) =>
+    capitaliseDrink({
+      ...drink,
+      name: inFull(drink.name),
+      ingredients: drink.ingredients.map((row) => ({ ...row, name: inFull(row.name) })),
+    }),
+  );
+  const preparations = cased.filter(isPreparation);
+
   let changed = false;
-  const tidy = drinks.map((drink) => {
-    const next = capitaliseDrink(drink);
+  const tidy = drinks.map((drink, at) => {
+    const next = cased[at] ?? drink;
+    const ingredients = next.ingredients.map((row, i) => {
+      if (!hasShorthand(drink.ingredients[i]?.name ?? '')) return row;
+      const name = preparationFor(preparations, row.name)?.name.trim() ?? row.name;
+      return name === row.name ? row : { ...row, name };
+    });
     if (
       next.name !== drink.name ||
       next.group !== drink.group ||
-      next.ingredients.some((row, i) => row.name !== drink.ingredients[i]?.name)
+      ingredients.some((row, i) => row.name !== drink.ingredients[i]?.name)
     ) {
       changed = true;
-      return next;
+      return { ...next, ingredients };
     }
     return drink;
   });

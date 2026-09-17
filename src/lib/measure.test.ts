@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { halve } from './measure';
+import { halve, measured } from './measure';
 
 describe('halve', () => {
   it('halves a whole gram figure to a half', () => {
@@ -92,5 +92,25 @@ describe('halve', () => {
     const input = '83g';
     halve(input);
     expect(input).toBe('83g');
+  });
+});
+
+describe('measured', () => {
+  it('shows a figure exactly as she typed it on Full, and never marks it', () => {
+    expect(measured('250g', false)).toEqual({ value: '250g', asWritten: false });
+    expect(measured('2ea (10cm)', false)).toEqual({ value: '2ea (10cm)', asWritten: false });
+    expect(measured('', false)).toEqual({ value: '', asWritten: false });
+  });
+
+  it('halves a jar figure on Half by the same rules as a glass figure', () => {
+    expect(measured('250g', true)).toEqual({ value: '125g', asWritten: false });
+    expect(measured('15g', true)).toEqual({ value: '7.5g', asWritten: false });
+    expect(measured('1 bottle', true)).toEqual({ value: '0.5 bottle', asWritten: false });
+    expect(measured('83g', true)).toEqual(halve('83g'));
+  });
+
+  it('marks a jar figure that cannot be split on Half', () => {
+    expect(measured('2ea (10cm)', true)).toEqual({ value: '2ea (10cm)', asWritten: true });
+    expect(measured('1ea (1/4 cut)', true)).toEqual({ value: '1ea (1/4 cut)', asWritten: true });
   });
 });

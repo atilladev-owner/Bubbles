@@ -7,7 +7,7 @@ import MoreSheet from './components/MoreSheet';
 import { shouldOfferInstall } from './components/InstallHint';
 import { EXAMPLE_DRINKS } from './data/examples';
 import { backupFilename, parseBackup, toBackup } from './lib/backup';
-import { capitaliseDrink, emptyDrink, orderGroups, tidyDrinks } from './lib/drinks';
+import { emptyDrink, orderGroups, tidyDrinks } from './lib/drinks';
 import {
   DEFAULT_GROUPS,
   EMPTY_META,
@@ -54,8 +54,9 @@ export default function App() {
         await saveDrinks(EXAMPLE_DRINKS);
         setDrinks(EXAMPLE_DRINKS);
       } else {
-        // A book that reached the phone before the casing rules existed is brought up
-        // to them once here, and written back only when that changed something.
+        // A book that reached the phone before a rule existed, the casing or the spelled
+        // out shorthand, is brought up to it here, and written back only when that
+        // changed something.
         const tidied = tidyDrinks(storedDrinks);
         if (tidied.changed) await saveDrinks(tidied.drinks);
         if (cancelled) return;
@@ -145,8 +146,12 @@ export default function App() {
 
   function saveDrink(next: Drink) {
     const exists = drinks.some((item) => item.id === next.id);
+    // The whole book is tidied, not only this drink: saving a preparation can turn an
+    // ingredient written in the shorthand somewhere else into a link to it.
     void persist(
-      exists ? drinks.map((item) => (item.id === next.id ? next : item)) : [...drinks, next],
+      tidyDrinks(
+        exists ? drinks.map((item) => (item.id === next.id ? next : item)) : [...drinks, next],
+      ).drinks,
     );
     if (exists) {
       back();
@@ -187,9 +192,9 @@ export default function App() {
       setNotice('That file is not a Bubbles backup.');
       return;
     }
-    // A file can hold anything she typed on another day, so every name in it is
-    // brought up to the same rule the edit form applies.
-    await persist(restored.map(capitaliseDrink));
+    // A file can hold anything she typed on another day, so the book in it is brought
+    // up to the same rules a save applies.
+    await persist(tidyDrinks(restored).drinks);
     setNotice(null);
     setMoreOpen(false);
     replace({ name: 'home' });
@@ -270,6 +275,9 @@ export default function App() {
           >
             {route.name === 'drink' ? (
               <DrinkView
+                // Keyed so a preparation reached through a link opens on Full, as every
+                // drink does, rather than inheriting Half from the drink she came from.
+                key={active.id}
                 drink={active}
                 drinks={drinks}
                 onBack={back}

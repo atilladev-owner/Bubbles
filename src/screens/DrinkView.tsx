@@ -3,8 +3,9 @@ import { motion, useReducedMotion } from 'motion/react';
 import { ChevronLeft, Pencil } from 'lucide-react';
 import Button from '../components/Button';
 import FavouriteToggle from '../components/FavouriteToggle';
-import { hasGlassFigures, preparationFor } from '../lib/drinks';
-import { grams, halve } from '../lib/measure';
+import { hasFigures, hasGlassFigures, preparationFor } from '../lib/drinks';
+import { grams, measured } from '../lib/measure';
+import type { Halved } from '../lib/measure';
 import type { Drink } from '../types';
 
 type Props = {
@@ -16,9 +17,10 @@ type Props = {
   onOpenDrink: (id: string) => void;
 };
 
+/** One switch for the whole recipe: Half halves the jar column and the glass column alike. */
 const MEASURES = [
-  { key: 'glass', label: 'Glass' },
-  { key: 'half', label: 'Half glass' },
+  { key: 'full', label: 'Full' },
+  { key: 'half', label: 'Half' },
 ] as const;
 
 function MeasureSwitch({ half, onChange }: { half: boolean; onChange: (half: boolean) => void }) {
@@ -60,18 +62,28 @@ function MeasureSwitch({ half, onChange }: { half: boolean; onChange: (half: boo
 /**
  * A figure and, under it, its share of the largest gram figure in the same column, so
  * the ratios of a recipe read at a glance: three times the syrup is three times the bar.
- * A value that is not a weight, and a blank, draw nothing.
+ * A value that is not a weight, and a blank, draw nothing. On Half, a figure the rules
+ * would not split is shown as she wrote it and says so.
  */
-function Figure({ text, largest, live }: { text: string; largest: number; live: boolean }) {
+function Figure({ figure, largest, live }: { figure: Halved; largest: number; live: boolean }) {
+  const text = figure.value;
   const trimmed = text.trim();
   if (trimmed === '') return null;
+  const asWritten = figure.asWritten ? (
+    <span className="mt-1.5 block text-13 text-muted">as written</span>
+  ) : null;
   const weight = grams(text);
   const share = weight === null || largest <= 0 ? null : weight / largest;
 
   // A value that opens with a number is a measurement and is set like one. A value that
   // is a phrase, "to taste" among them, is read rather than measured, so it stays body text.
   if (!/^\d/.test(trimmed)) {
-    return <span className="block text-17 break-words text-ink">{text}</span>;
+    return (
+      <>
+        <span className="block text-17 break-words text-ink">{text}</span>
+        {asWritten}
+      </>
+    );
   }
 
   return (
@@ -86,6 +98,7 @@ function Figure({ text, largest, live }: { text: string; largest: number; live: 
           style={{ width: 'max(4px, ' + (share * 100).toFixed(1) + '%)' }}
         />
       )}
+      {asWritten}
     </>
   );
 }
@@ -99,6 +112,7 @@ export default function DrinkView({
   onOpenDrink,
 }: Props) {
   const [half, setHalf] = useState(false);
+  const showSwitch = hasFigures(drink);
   const showGlass = hasGlassFigures(drink);
   const rows = drink.ingredients.filter(
     (row) => row.name.trim() !== '' || row.jar.trim() !== '' || row.glass.trim() !== '',
@@ -106,9 +120,10 @@ export default function DrinkView({
 
   const shown = rows.map((row) => ({
     row,
-    glass: half ? halve(row.glass) : { value: row.glass, asWritten: false },
+    jar: measured(row.jar, half),
+    glass: measured(row.glass, half),
   }));
-  const largestJar = Math.max(0, ...shown.map((item) => grams(item.row.jar) ?? 0));
+  const largestJar = Math.max(0, ...shown.map((item) => grams(item.jar.value) ?? 0));
   const largestGlass = Math.max(0, ...shown.map((item) => grams(item.glass.value) ?? 0));
 
   return (
@@ -133,7 +148,7 @@ export default function DrinkView({
       </h1>
       <p className="mt-1 text-15 text-muted">{drink.group}</p>
 
-      {showGlass ? <MeasureSwitch half={half} onChange={setHalf} /> : null}
+      {showSwitch ? <MeasureSwitch half={half} onChange={setHalf} /> : null}
 
       <table className="mt-8 w-full table-fixed border-collapse">
         <caption className="sr-only">Ingredients for {drink.name}</caption>
@@ -182,14 +197,11 @@ export default function DrinkView({
                   )}
                 </td>
                 <td className="py-4 pr-3">
-                  <Figure text={item.row.jar} largest={largestJar} live={false} />
+                  <Figure figure={item.jar} largest={largestJar} live={false} />
                 </td>
                 {showGlass ? (
                   <td className="py-4">
-                    <Figure text={item.glass.value} largest={largestGlass} live={true} />
-                    {half && item.glass.asWritten && item.row.glass.trim() !== '' ? (
-                      <span className="mt-1.5 block text-13 text-muted">as written</span>
-                    ) : null}
+                    <Figure figure={item.glass} largest={largestGlass} live={true} />
                   </td>
                 ) : null}
               </tr>

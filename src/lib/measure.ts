@@ -1,7 +1,7 @@
 /**
  * The halving rules. Pure, and the only place a measurement is ever transformed.
  *
- * A glass figure is halvable when it opens with a number and the unit after that
+ * A figure, jar or glass, is halvable when it opens with a number and the unit after that
  * number is one that divides. The list of those units is closed, so anything the
  * book has not been told about comes back as written rather than being guessed at:
  * half a lemon wedge is not a thing she pours.
@@ -64,6 +64,14 @@ export function halve(value: string): Halved {
   if (!Number.isFinite(amount)) return { value, asWritten: true };
 
   return { value: render(toNearestHalf(amount / 2)) + rest, asWritten: false };
+}
+
+/**
+ * A figure as the recipe shows it under the switch: exactly as she typed it on Full,
+ * halved on Half. Jar and glass figures go through the same rules.
+ */
+export function measured(value: string, half: boolean): Halved {
+  return half ? halve(value) : { value, asWritten: false };
 }
 
 /**

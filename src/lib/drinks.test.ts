@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { capitaliseDrink, matchesQuery, orderGroups, rankDrinks, sectionsFor, tidyDrinks } from './drinks';
+import {
+  capitaliseDrink,
+  hasFigures,
+  matchesQuery,
+  orderGroups,
+  preparationFor,
+  rankDrinks,
+  sectionsFor,
+  tidyDrinks,
+} from './drinks';
 import { DEFAULT_GROUPS } from './storage';
 import type { Drink } from '../types';
 
@@ -206,5 +215,122 @@ describe('tidyDrinks', () => {
     tidyDrinks(rough);
     expect(rough[0]?.name).toBe('jim beam & coke');
     expect(rough[0]?.ingredients[0]?.name).toBe('soda water');
+  });
+});
+
+describe('tidyDrinks and the shorthand for makgeolli', () => {
+  const mix = drink('Peach Makgeolli Mix', 'Preparations', false, 'Peach base');
+  const pouring = (name: string, group: string, ingredient: string): Drink => ({
+    ...drink(name, group, false),
+    ingredients: [
+      { name: ingredient, jar: '250g', glass: '83g' },
+      { name: 'Makgeolli', jar: '150g', glass: '50g' },
+    ],
+  });
+
+  it('spells the shorthand out so the ingredient becomes a link to its preparation', () => {
+    const book = [pouring('Peach Makgeolli', 'Makgeolli', 'Peach mak.g mix'), mix];
+    expect(preparationFor(book, 'Peach mak.g mix')).toBeUndefined();
+
+    const result = tidyDrinks(book);
+    const name = result.drinks[0]?.ingredients[0]?.name ?? '';
+    expect(result.changed).toBe(true);
+    expect(name).toBe('Peach Makgeolli Mix');
+    expect(preparationFor(result.drinks, name)?.id).toBe(mix.id);
+  });
+
+  it('reaches every drink that pours the same preparation', () => {
+    const book = [
+      pouring('Peach Makgeolli', 'Makgeolli', 'Peach mak.g mix'),
+      pouring('Peach Soju', 'Soju', 'Peach mak.g mix'),
+      mix,
+    ];
+    expect(tidyDrinks(book).drinks.map((d) => d.ingredients[0]?.name)).toEqual([
+      'Peach Makgeolli Mix',
+      'Peach Makgeolli Mix',
+      'Peach base',
+    ]);
+  });
+
+  it('does not care how the shorthand was cased', () => {
+    const book = [pouring('Peach Makgeolli', 'Makgeolli', 'peach MAK.G mix'), mix];
+    expect(tidyDrinks(book).drinks[0]?.ingredients[0]?.name).toBe('Peach Makgeolli Mix');
+  });
+
+  it('takes the name of a preparation that itself still needs its capitals', () => {
+    const rough = drink('peach makgeolli mix', 'Preparations', false, 'Peach base');
+    const book = [pouring('Peach Makgeolli', 'Makgeolli', 'Peach mak.g mix'), rough];
+    expect(tidyDrinks(book).drinks[0]?.ingredients[0]?.name).toBe('Peach Makgeolli Mix');
+  });
+
+  it('writes the word in full even when no preparation answers to it yet', () => {
+    const book = [pouring('Mango Makgeolli', 'Makgeolli', 'Mango mak.g mix'), mix];
+    const result = tidyDrinks(book);
+    expect(result.changed).toBe(true);
+    expect(result.drinks[0]?.ingredients[0]?.name).toBe('Mango makgeolli mix');
+  });
+
+  it('lifts the word when it opens the ingredient name', () => {
+    const book = [pouring('House Pour', 'Makgeolli', 'mak.g')];
+    expect(tidyDrinks(book).drinks[0]?.ingredients[0]?.name).toBe('Makgeolli');
+  });
+
+  it('writes a drink name in full, so a preparation saved in the shorthand still links', () => {
+    const short = drink('Mango mak.g Mix', 'Preparations', false, 'Mango base');
+    const book = [pouring('mango mak.g', 'Makgeolli', 'Mango mak.g mix'), short];
+    const result = tidyDrinks(book);
+    const name = result.drinks[0]?.ingredients[0]?.name ?? '';
+    expect(result.drinks.map((d) => d.name)).toEqual(['Mango Makgeolli', 'Mango Makgeolli Mix']);
+    expect(name).toBe('Mango Makgeolli Mix');
+    expect(preparationFor(result.drinks, name)?.id).toBe(short.id);
+  });
+
+  it('leaves a word that only looks like the shorthand alone', () => {
+    const book = [pouring('Peach Makgeolli', 'Makgeolli', 'Remak.go syrup'), mix];
+    const result = tidyDrinks(book);
+    expect(result.changed).toBe(false);
+    expect(result.drinks[0]?.ingredients[0]?.name).toBe('Remak.go syrup');
+  });
+
+  it('settles: a book already tidied has nothing left to change', () => {
+    const book = [pouring('Peach Makgeolli', 'Makgeolli', 'Peach mak.g mix'), mix];
+    const once = tidyDrinks(book);
+    const twice = tidyDrinks(once.drinks);
+    expect(twice.changed).toBe(false);
+    expect(twice.drinks).toEqual(once.drinks);
+  });
+
+  it('never touches a figure, and leaves what it was given untouched', () => {
+    const book = [pouring('Peach Makgeolli', 'Makgeolli', 'Peach mak.g mix'), mix];
+    const result = tidyDrinks(book);
+    expect(result.drinks[0]?.ingredients[0]).toEqual({
+      name: 'Peach Makgeolli Mix',
+      jar: '250g',
+      glass: '83g',
+    });
+    expect(book[0]?.ingredients[0]?.name).toBe('Peach mak.g mix');
+  });
+});
+
+describe('hasFigures', () => {
+  it('is true for a drink with a jar figure and no glass figure, as a preparation has', () => {
+    expect(hasFigures(syrup)).toBe(true);
+  });
+
+  it('is true for a drink with only a glass figure', () => {
+    const glassOnly: Drink = {
+      ...drink('Peach Makgeolli', 'Makgeolli', false),
+      ingredients: [{ name: 'Makgeolli', jar: '', glass: '50g' }],
+    };
+    expect(hasFigures(glassOnly)).toBe(true);
+  });
+
+  it('is false when every figure is blank', () => {
+    const bare: Drink = {
+      ...drink('Garnish Tray', 'Preparations', false),
+      ingredients: [{ name: 'Ice', jar: '  ', glass: '' }],
+    };
+    expect(hasFigures(bare)).toBe(false);
+    expect(hasFigures(drink('Empty', 'Ritas', false))).toBe(false);
   });
 });
